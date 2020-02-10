@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class VirtualSceneInitializer : MonoBehaviour
 {
-
+    public GameObject Eye;
+    public GameObject mirrorEye;
     public GameObject RealWorld;
+
+    public GameObject EyeParent;
     public Camera LeftEye;
     public Camera RightEye;
 
@@ -14,6 +17,15 @@ public class VirtualSceneInitializer : MonoBehaviour
     {
         if (RealWorld != null)
         {
+            mirrorEye = new GameObject("MirrorEye");
+            mirrorEye.transform.parent = transform;
+            TransformUpdater tu = mirrorEye.AddComponent<TransformUpdater>();
+            tu.originalGo = Eye;
+
+            // For now only one eye;
+            LeftEye.GetComponent<DisplayProjection>().eye = mirrorEye;
+            RightEye.GetComponent<DisplayProjection>().eye = mirrorEye;
+
             TraverseHierarchy(RealWorld.transform, transform);
         }
     }
@@ -66,6 +78,12 @@ public class VirtualSceneInitializer : MonoBehaviour
             {
                 var updater = RightEye.gameObject.AddComponent<TransformUpdater>();
                 updater.originalGo = go;
+            }
+            if (child.name == "Display")
+            {
+                EyeParent.transform.parent = go.transform;
+                EyeParent.transform.localPosition = Vector3.zero;
+                EyeParent.transform.localRotation = Quaternion.identity;
             }
 
             TraverseHierarchy(child, go.transform);
