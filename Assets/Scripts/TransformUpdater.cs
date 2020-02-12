@@ -7,12 +7,12 @@ public class TransformUpdater : MonoBehaviour
 
     public GameObject originalGo;
 
-    private TransformHandler th;
+    private DefaultTransformHandler th;
 
     // Start is called before the first frame update
     void Start()
     {
-        th = originalGo.GetComponent<TransformHandler>();
+        th = originalGo.GetComponent<DefaultTransformHandler>();
     }
     
     void LateUpdate()
