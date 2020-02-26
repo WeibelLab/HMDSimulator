@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property |
                 AttributeTargets.Class | AttributeTargets.Struct)]
@@ -32,7 +32,7 @@ public class ConditionalHideAttribute : PropertyAttribute
 }
  
 [CustomPropertyDrawer(typeof(ConditionalHideAttribute))]
-public class ConditionalHidePropertyDrawer : PropertyDrawer
+public class ConditionalHidePropertyDrawer : UnityEventDrawer 
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
@@ -44,7 +44,14 @@ public class ConditionalHidePropertyDrawer : PropertyDrawer
         if (!condHAtt.HideInInspector || enabled)
         {
             //Debug.Log(property.propertyType);
-            EditorGUI.PropertyField(position, property, label, true);
+            if (property.propertyType != SerializedPropertyType.Generic)
+            {
+                EditorGUI.PropertyField(position, property, label, true);
+            }
+            else
+            {
+                base.OnGUI(position, property, label);
+            }
         }
  
         GUI.enabled = wasEnabled;
@@ -57,7 +64,14 @@ public class ConditionalHidePropertyDrawer : PropertyDrawer
  
         if (!condHAtt.HideInInspector || enabled)
         {
-            return EditorGUI.GetPropertyHeight(property, label);
+            if (property.propertyType != SerializedPropertyType.Generic)
+            {
+                return EditorGUI.GetPropertyHeight(property, label);
+            }
+            else
+            {
+                return base.GetPropertyHeight(property, label);
+            }
         }
         else
         {
