@@ -21,7 +21,6 @@ public class DisplayProjection : MonoBehaviour
         Debug.Log(name);
         Debug.Log(cam.projectionMatrix);
         oldProj = cam.projectionMatrix;
-
         
     }
 
