@@ -80,8 +80,19 @@ public class GenericTrackerBehavior : TrackerBehavior
         float t = Time.fixedTime;
         float latency = _GetLatency();
         float target = t - latency;
-        Snapshot result = snapshots.First(snapshot => (snapshot.time < target));
-        return result;
+        Snapshot result = snapshots.FirstOrDefault(snapshot => (snapshot.time < target));
+        if (result != null)
+        {
+            return result;
+        }
+        else if(snapshots.Count > 0)
+        {
+            return snapshots.First();
+        }
+        else
+        {
+            return new Snapshot();
+        }
     }
 
     public override Vector3 GetTranslation()  
@@ -113,7 +124,7 @@ public class GenericTrackerBehavior : TrackerBehavior
         if (latencyCallbacks.Count > 0)
         {
             // Accum snapshot buffer
-            snapshots.Prepend(new Snapshot
+            snapshots.Insert(0, new Snapshot
             {
                 time = Time.fixedTime,
                 position = _GetTranslation(),

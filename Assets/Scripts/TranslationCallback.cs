@@ -37,18 +37,21 @@ public class TranslationCallback
     private Vector3 p1;
     private float t0 = -1;
     private float t1 = -1;
+    
 
     private Vector3 vel = Vector3.zero;
 
     public Vector3 GetTranslation(Vector3 orig)
     {
-        result = orig;
+        
         float t = Time.fixedTime;
         switch (type)
         {
             case Type.PassThrough:
+                result = orig;
                 break;
             case Type.Constant:
+                result = orig;
                 result += constantOffset;
                 break;
             case Type.AccelDrift:
@@ -69,6 +72,10 @@ public class TranslationCallback
                     // Acceleration
                     accel = ((orig - p1) / dt1 - (p1 - p0) / dt0) / ((dt0 + dt1) / 2.0f);
                 }
+                else
+                {
+                    result = orig;
+                }
                 // Update position based on accel (forward)
                 vel += (accel * accelDriftFactor) * (t - t1);
                 result += vel * (t - t1);
@@ -79,7 +86,11 @@ public class TranslationCallback
                 if (t1 > 0)
                 {
                     dp = Vector3.Scale(orig - p1, axisMagnitude);
-                    result = p1 + dp;
+                    result = result + dp;
+                }
+                else
+                {
+                    result = orig;
                 }
                 break;
             case Type.Custom:
