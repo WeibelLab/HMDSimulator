@@ -12,11 +12,8 @@ public class Snapshot
     public Quaternion rotation;
 }
 
-public class GenericTrackerBehavior : MonoBehaviour
+public class GenericTrackerBehavior : TrackerBehavior
 {
-
-    public string trackerName;
-    public Transform root;
     public int bufferLimit = 400;
 
     public List<LatencyCallback> latencyCallbacks;
@@ -32,7 +29,12 @@ public class GenericTrackerBehavior : MonoBehaviour
 
     private Vector3 _GetTranslation()
     {
-        Vector3 result = transform.localPosition;
+        Vector3 result = transform.position;
+        if (root != null)
+        {
+            result = root.InverseTransformPoint(result);
+        }
+
         foreach (var cb in translationCallbacks)
         {
             result = cb.GetTranslation(result);
@@ -41,9 +43,19 @@ public class GenericTrackerBehavior : MonoBehaviour
         return result;
     }
 
+    private static Quaternion QuaternionFromMatrix(Matrix4x4 m)
+    {
+        return Quaternion.LookRotation(m.GetColumn(2), m.GetColumn(1));
+    }
+
     private Quaternion _GetRotation()
     {
-        Quaternion result = transform.localRotation;
+        Quaternion result = transform.rotation;
+        if (root != null)
+        {
+            result = QuaternionFromMatrix(root.worldToLocalMatrix * Matrix4x4.TRS(Vector3.zero, result, Vector3.one));
+        }
+
         foreach (var cb in rotationCallbacks)
         {
             result = cb.GetRotation(result);
@@ -72,7 +84,7 @@ public class GenericTrackerBehavior : MonoBehaviour
         return result;
     }
 
-    public Vector3 GetTranslation()
+    public override Vector3 GetTranslation()  
     {
         if (latencyCallbacks.Count == 0)
         {
@@ -84,7 +96,7 @@ public class GenericTrackerBehavior : MonoBehaviour
         }
     }
 
-    public Quaternion GetRotatioin()
+    public override Quaternion GetRotation()
     {
         if (latencyCallbacks.Count == 0)
         {
