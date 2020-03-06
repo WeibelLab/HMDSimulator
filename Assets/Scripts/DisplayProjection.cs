@@ -38,7 +38,7 @@ public class DisplayProjection : MonoBehaviour
 
         if (name == "Left")
         {
-            Debug.Log(center);
+            //Debug.Log(center);
         }
 
         center *= 0.985f;
