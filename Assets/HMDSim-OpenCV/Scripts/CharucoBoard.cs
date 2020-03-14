@@ -10,6 +10,8 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer))]
 public class CharucoBoard : MonoBehaviour
 {
+
+    public int detectorHandle = -1;
     public Vector2Int squareCount = Vector2Int.one;
     public int squareResolution = 512;
     public int markerResolution = 512;
@@ -21,6 +23,7 @@ public class CharucoBoard : MonoBehaviour
 
     private Vector2Int _resolution = Vector2Int.zero;
     private HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY _oldDictionary;
+
 
     private void OnEnable()
     {
@@ -34,7 +37,7 @@ public class CharucoBoard : MonoBehaviour
 
         if (markerResolution >= squareResolution)
         {
-            markerResolution = squareResolution - 1;
+            //markerResolution = squareResolution - 1;
         }
 
         if (squareCount.x < 1 || squareCount.x > 10)
@@ -85,7 +88,9 @@ public class CharucoBoard : MonoBehaviour
         if (needToGenerateAgain)
         {
             // draw the image
-            bool generatedWell = HMDSimOpenCV.Instance.Aruco_DrawCharucoBoard((int)_oldDictionary, squareCount.x, squareCount.y, squareResolution, markerResolution, true, textureBuffer);
+            detectorHandle = HMDSimOpenCV.Instance.Aruco_CreateDetector((int) _oldDictionary, squareCount.x,
+                squareCount.y, squareResolution, markerResolution, true);
+            bool generatedWell = HMDSimOpenCV.Instance.Aruco_DrawCharucoBoard(detectorHandle, textureBuffer);
 
             // update the texture
             boardTexture.LoadRawTextureData(textureBuffer);

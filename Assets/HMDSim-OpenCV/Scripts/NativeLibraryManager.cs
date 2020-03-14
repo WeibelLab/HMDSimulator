@@ -23,8 +23,15 @@ public class NativeLibraryManager
 	public static extern bool FreeLibrary(
 		IntPtr libraryHandle);
 
+    [DllImport("kernel32")]
+    public static extern int GetLastError();
+
+    [DllImport("kernel32")]
+    public static extern IntPtr GetModuleHandle(string path);
+
 	public static IntPtr OpenLibrary(string path)
 	{
+        Debug.Log("Loading: " + path);
 		IntPtr handle = LoadLibrary(path);
 		if (handle == IntPtr.Zero)
 		{
@@ -33,10 +40,13 @@ public class NativeLibraryManager
 		return handle;
 	}
 
-	public static void CloseLibrary(IntPtr libraryHandle)
+	public static bool CloseLibrary(IntPtr libraryHandle)
 	{
-		FreeLibrary(libraryHandle);
-	}
+        Debug.Log("Unloading");
+		bool flag = FreeLibrary(libraryHandle);
+        Debug.Log(flag + ":" + NativeLibraryManager.GetLastError());
+        return flag;
+    }
 
 	public static T GetDelegate<T>(
 		IntPtr libraryHandle,
