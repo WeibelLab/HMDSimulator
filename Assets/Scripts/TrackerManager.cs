@@ -9,7 +9,6 @@ public class TrackerManager : MonoBehaviour
 
     public void UpdateTrackers()
     {
-        List<TrackerBehavior> objs = new List<TrackerBehavior>();
         foreach (TrackerBehavior tracker in Object.FindObjectsOfType(typeof(TrackerBehavior)))
         {
             if(tracker.gameObject?.scene.name?.CompareTo("RealWorld") == 0){

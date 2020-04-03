@@ -690,6 +690,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 412124882}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &506061087
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 506061088}
+  - component: {fileID: 506061089}
+  m_Layer: 0
+  m_Name: Body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &506061088
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506061087}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.69, y: 0.59, z: -2.95}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 534669905}
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &506061089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506061087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e83004e4e1df3c4e8c9d23efdbaafb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 10
 --- !u!1 &534669902
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,7 +790,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: 1
+  m_Depth: 2
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -768,12 +813,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.677, y: 1.188, z: -1.496}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 257599859}
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_Father: {fileID: 506061088}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &534669906
 MonoBehaviour:
@@ -1198,7 +1243,7 @@ GameObject:
   - component: {fileID: 1456361840}
   - component: {fileID: 1456361843}
   m_Layer: 0
-  m_Name: Sphere (1)
+  m_Name: Sphere_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1340,10 +1385,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chBoard: {fileID: 682804490}
+  trackableCamera: {fileID: 1533817194}
   cameraTexture: {fileID: 8400000, guid: 589d325b5cae03b4dae61cd44275c2b0, type: 2}
   image: {fileID: 0}
+  worldMatrix:
+    e00: 0
+    e01: 0
+    e02: 0
+    e03: 0
+    e10: 0
+    e11: 0
+    e12: 0
+    e13: 0
+    e20: 0
+    e21: 0
+    e22: 0
+    e23: 0
+    e30: 0
+    e31: 0
+    e32: 0
+    e33: 0
   debugQuad: {fileID: 1649520338}
   debugTexture2D: {fileID: 0}
+  calibrated: 0
 --- !u!1 &1533817191
 GameObject:
   m_ObjectHideFlags: 0
@@ -1354,6 +1418,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1533817192}
   - component: {fileID: 1533817194}
+  - component: {fileID: 1533817193}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -1375,6 +1440,27 @@ Transform:
   m_Father: {fileID: 257599859}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1533817193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1533817191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c56ecf726ff2df046bcf75684cb22a9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraCalibration: {fileID: 1522411095}
+  trackedMarkers:
+  - markerId: 13
+    markerData:
+      marker: {fileID: 1995659887}
+      position: {x: 1000, y: 1000, z: 1000}
+      rotation: {x: 0, y: 0, z: 0}
+      found: 0
+  expectedMarkerCount: 16
 --- !u!20 &1533817194
 Camera:
   m_ObjectHideFlags: 0
@@ -1637,6 +1723,7 @@ GameObject:
   - component: {fileID: 1995659889}
   - component: {fileID: 1995659888}
   - component: {fileID: 1995659887}
+  - component: {fileID: 1995659891}
   m_Layer: 0
   m_Name: Quad
   m_TagString: Untagged
@@ -1672,7 +1759,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resolution: 512
   MarkerDictionary: 6
-  markerId: 42
+  markerId: 13
+  markerSize: 1
 --- !u!64 &1995659888
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1734,6 +1822,44 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1995659885}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1995659891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1995659885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c36f1d59e9383c42aa1690f6be64be3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trackerName: marker42
+  root: {fileID: 0}
+  bufferLimit: 400
+  latencyCallbacks: []
+  translationCallbacks:
+  - type: 4
+    constantOffset: {x: 0, y: 0, z: 0}
+    accelDriftFactor: 0
+    axisMagnitude: {x: 0, y: 0, z: 0}
+    markerId: 13
+    customEvent:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1533817193}
+          m_MethodName: GetTranslation
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    result: {x: 0, y: 0, z: 0}
+  rotationCallbacks: []
 --- !u!1 &2004033266
 GameObject:
   m_ObjectHideFlags: 0

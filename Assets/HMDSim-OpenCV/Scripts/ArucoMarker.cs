@@ -15,6 +15,7 @@ public class ArucoMarker : MonoBehaviour
     //public bool border = true; (disabling this for now)
     public HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY MarkerDictionary = HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY.DICT_5X5_250;
     public int markerId = 42;
+    public float markerSize = 1.0f;
 
     private byte[] textureBuffer;
     Texture2D markerTexture;

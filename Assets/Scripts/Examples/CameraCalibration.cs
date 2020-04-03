@@ -6,11 +6,14 @@ using UnityEngine.Experimental.Rendering;
 public class CameraCalibration : MonoBehaviour
 {
     public CharucoBoard chBoard;
+    public Camera trackableCamera;
     public RenderTexture cameraTexture;
     public Texture2D image;
+    public Matrix4x4 worldMatrix;
     public Renderer debugQuad;
 
     public Texture2D debugTexture2D;
+    public bool calibrated = false;
 
     private int width;
     private int height;
@@ -49,6 +52,7 @@ public class CameraCalibration : MonoBehaviour
             image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             image.Apply();
             RenderTexture.active = null;
+            worldMatrix = trackableCamera.worldToCameraMatrix;
         }
     }
 
@@ -84,6 +88,7 @@ public class CameraCalibration : MonoBehaviour
                 {
                     double result = HMDSimOpenCV.Instance.Aruco_CalibrateCameraCharuco(handle);
                     Debug.Log("Calibration error: " + result);
+                    calibrated = true;
                 }
             }
         }

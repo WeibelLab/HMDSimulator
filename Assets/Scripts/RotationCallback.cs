@@ -40,6 +40,9 @@ public class RotationCallback
     [ConditionalHide("type", (int) Type.Curve, true)]
     public AnimationCurve curveZ = new AnimationCurve();
 
+    [ConditionalHide("type", (int)Type.Custom, true)]
+    public int markerId;
+
     [ConditionalHide("type", (int) Type.Custom, true)]
     public CustomTranslationEvent customEvent;
 

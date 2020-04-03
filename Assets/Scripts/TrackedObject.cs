@@ -16,8 +16,7 @@ public class TrackedObject : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    void PerformUpdate()
     {
         TrackerBehavior tracker;
         if (MainManager.Instance.trackerManager.GetTracker(trackerName, out tracker))
@@ -25,5 +24,16 @@ public class TrackedObject : MonoBehaviour
             transform.position = tracker.GetTranslation() + offset;
             transform.rotation = tracker.GetRotation();
         }
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        PerformUpdate();
+    }
+
+    void Update()
+    {
+        PerformUpdate();
     }
 }

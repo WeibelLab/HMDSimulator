@@ -30,6 +30,8 @@ public class TranslationCallback
     [ConditionalHide("type", (int)Type.AxisMagnitude, true)]
     public Vector3 axisMagnitude = Vector3.one;
     [ConditionalHide("type", (int)Type.Custom, true)]
+    public int markerId;
+    [ConditionalHide("type", (int)Type.Custom, true)]
     public CustomTranslationEvent customEvent;
 
     [HideInInspector] public Vector3 result;

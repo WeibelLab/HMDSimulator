@@ -29,8 +29,7 @@ public class MainManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    void PerformUpdate()
     {
         if (!sceneReady)
         {
@@ -42,7 +41,23 @@ public class MainManager : MonoBehaviour
         }
         else
         {
-            
+
         }
+    }
+
+    void Update()
+    {
+        PerformUpdate();
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        PerformUpdate();
+    }
+
+    void LateUpdate()
+    {
+        PerformUpdate();
     }
 }

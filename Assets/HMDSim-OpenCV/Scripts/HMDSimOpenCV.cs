@@ -62,6 +62,11 @@ public class HMDSimOpenCV : MonoBehaviour
     public delegate bool _Aruco_DrawMarker_Type(
         int predefinedDict, int markerId, int markerSize, bool border, byte[] rgbOutput);
 
+    public delegate int _Aruco_EstimateMarkersPoseWithDetector_Type(
+        byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, int detectorHandle,
+        int expectedMarkerCount,
+        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds);
+
     public delegate int _Aruco_EstimateMarkersPose_Type(
         byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, float[] cameraMatrix,
         float[] distCoeffs, int distCoeffLength,
@@ -77,14 +82,17 @@ public class HMDSimOpenCV : MonoBehaviour
 
     public delegate double _Aruco_CalibrateCameraCharuco_Type(int detectorHandle);
 
+    public delegate int _Aruco_GetCalibrateResult_Type(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
 
     public _RegisterDebugCallback_Type RegisterDebugCallback;
     public _Aruco_DrawMarker_Type Aruco_DrawMarker;
+    public _Aruco_EstimateMarkersPoseWithDetector_Type Aruco_EstimateMarkersPoseWithDetector;
     public _Aruco_EstimateMarkersPose_Type Aruco_EstimateMarkersPose;
     public _Aruco_CreateDetector_Type Aruco_CreateDetector;
     public _Aruco_DrawCharucoBoard_Type Aruco_DrawCharucoBoard;
     public _Aruco_CollectCharucoCorners_Type Aruco_CollectCharucoCorners;
     public _Aruco_CalibrateCameraCharuco_Type Aruco_CalibrateCameraCharuco;
+    public _Aruco_GetCalibrateResult_Type Aruco_GetCalibrateResult;
 
 #else
 
@@ -93,6 +101,11 @@ public class HMDSimOpenCV : MonoBehaviour
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern bool Aruco_DrawMarker(int predefinedDict, int markerId, int markerSize, bool border, byte[] rgbOutput);
     
+    [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
+    public static extern int Aruco_EstimateMarkersPoseWithDetector(byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, int detectorHandle,
+        int expectedMarkerCount,
+        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds);
+
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern int Aruco_EstimateMarkersPose(byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, float[] cameraMatrix,
         float[] distCoeffs, int distCoeffLength,
@@ -113,6 +126,9 @@ public class HMDSimOpenCV : MonoBehaviour
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern double Aruco_CalibrateCameraCharuco(int detectorHandle);
 
+    [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
+    public static extern int Aruco_GetCalibrateResult(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
+
 #endif
 
     void Awake()
@@ -132,6 +148,9 @@ public class HMDSimOpenCV : MonoBehaviour
         Aruco_DrawMarker = NativeLibraryManager.GetDelegate<_Aruco_DrawMarker_Type>(
             libraryHandle,
             "Aruco_DrawMarker");
+        Aruco_EstimateMarkersPoseWithDetector = NativeLibraryManager.GetDelegate<_Aruco_EstimateMarkersPoseWithDetector_Type>(
+            libraryHandle,
+            "Aruco_EstimateMarkersPoseWithDetector");
         Aruco_EstimateMarkersPose = NativeLibraryManager.GetDelegate<_Aruco_EstimateMarkersPose_Type>(
             libraryHandle,
             "Aruco_EstimateMarkersPose");
@@ -147,6 +166,9 @@ public class HMDSimOpenCV : MonoBehaviour
         Aruco_CalibrateCameraCharuco = NativeLibraryManager.GetDelegate<_Aruco_CalibrateCameraCharuco_Type>(
             libraryHandle,
             "Aruco_CalibrateCameraCharuco");
+        Aruco_GetCalibrateResult = NativeLibraryManager.GetDelegate<_Aruco_GetCalibrateResult_Type>(
+            libraryHandle,
+            "Aruco_GetCalibrateResult");
         RegisterDebugCallback(new DebugCallback(DebugLog));
 #endif
 
