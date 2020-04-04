@@ -21,7 +21,7 @@ public class GenericTrackerBehavior : TrackerBehavior
     public List<RotationCallback> rotationCallbacks;
 
     private List<Snapshot> snapshots;
-
+    
     void Awake()
     {
         snapshots = new List<Snapshot>();

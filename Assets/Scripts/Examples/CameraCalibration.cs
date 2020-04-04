@@ -74,7 +74,7 @@ public class CameraCalibration : MonoBehaviour
                     int result = HMDSimOpenCV.Instance.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, debugBuffer);
                     debugTexture2D.LoadRawTextureData(debugBuffer);
                     debugTexture2D.Apply();
-                    debugQuad.material.mainTexture = debugTexture2D;
+                    //debugQuad.material.mainTexture = debugTexture2D;
                     Debug.Log("Collect corners result: " + result);
                 }
             }

@@ -7,6 +7,7 @@ public class TrackedObject : MonoBehaviour
 
     public string trackerName = "";
 
+    public bool isLocal = false;
     // For now
     public Vector3 offset = new Vector3(100, 100, 100);
 
@@ -21,8 +22,16 @@ public class TrackedObject : MonoBehaviour
         TrackerBehavior tracker;
         if (MainManager.Instance.trackerManager.GetTracker(trackerName, out tracker))
         {
-            transform.position = tracker.GetTranslation() + offset;
-            transform.rotation = tracker.GetRotation();
+            if (isLocal)
+            {
+                transform.localPosition = tracker.GetTranslation();
+                transform.localRotation = tracker.GetRotation();
+            }
+            else
+            {
+                transform.position = tracker.GetTranslation() + offset;
+                transform.rotation = tracker.GetRotation();
+            }
         }
     }
 

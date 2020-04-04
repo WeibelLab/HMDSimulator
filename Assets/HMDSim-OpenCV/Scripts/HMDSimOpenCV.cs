@@ -65,13 +65,13 @@ public class HMDSimOpenCV : MonoBehaviour
     public delegate int _Aruco_EstimateMarkersPoseWithDetector_Type(
         byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, int detectorHandle,
         int expectedMarkerCount,
-        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds);
+        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds, byte[] rgbOutput);
 
     public delegate int _Aruco_EstimateMarkersPose_Type(
         byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, float[] cameraMatrix,
         float[] distCoeffs, int distCoeffLength,
         int expectedMarkerCount,
-        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds);
+        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds, byte[] rgbOutput);
 
     public delegate int _Aruco_CreateDetector_Type(int predefinedDict, int squareWidth, int squareHeight,
         float squareLength, float markerLength, bool border);
@@ -104,13 +104,13 @@ public class HMDSimOpenCV : MonoBehaviour
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern int Aruco_EstimateMarkersPoseWithDetector(byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, int detectorHandle,
         int expectedMarkerCount,
-        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds);
+        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds, byte[] rgbOutput);
 
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern int Aruco_EstimateMarkersPose(byte[] rgbInput, int width, int height, int predefinedDict, float markerLength, float[] cameraMatrix,
         float[] distCoeffs, int distCoeffLength,
         int expectedMarkerCount,
-        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds);
+        float[] outputMarkerPosVec3, float[] outputMarkerRotVec3, int[] outputMarkerIds, byte[] rgbOutput);
 
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern int Aruco_CreateDetector(int predefinedDict, int squareWidth, int squareHeight,
