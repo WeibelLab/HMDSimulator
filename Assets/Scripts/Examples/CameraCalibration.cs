@@ -9,7 +9,8 @@ public class CameraCalibration : MonoBehaviour
     public Camera trackableCamera;
     public RenderTexture cameraTexture;
     public Texture2D image;
-    public Matrix4x4 worldMatrix;
+    public Matrix4x4 worldToLocal;
+    public Matrix4x4 localToWorld;
     public Renderer debugQuad;
 
     public Texture2D debugTexture2D;
@@ -52,7 +53,8 @@ public class CameraCalibration : MonoBehaviour
             image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             image.Apply();
             RenderTexture.active = null;
-            worldMatrix = trackableCamera.worldToCameraMatrix;
+            worldToLocal = trackableCamera.transform.worldToLocalMatrix;
+            localToWorld = trackableCamera.transform.localToWorldMatrix;
         }
     }
 
@@ -71,7 +73,7 @@ public class CameraCalibration : MonoBehaviour
                     int height = image.height;
                     byte[] debugBuffer = new byte[width * height * 3];
                     debugTexture2D = new Texture2D(width, height, TextureFormat.RGB24, false);
-                    int result = HMDSimOpenCV.Instance.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, debugBuffer);
+                    int result = HMDSimOpenCV.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, debugBuffer);
                     debugTexture2D.LoadRawTextureData(debugBuffer);
                     debugTexture2D.Apply();
                     //debugQuad.material.mainTexture = debugTexture2D;
@@ -86,7 +88,7 @@ public class CameraCalibration : MonoBehaviour
                 int handle = chBoard.detectorHandle;
                 if (handle >= 0)
                 {
-                    double result = HMDSimOpenCV.Instance.Aruco_CalibrateCameraCharuco(handle);
+                    double result = HMDSimOpenCV.Aruco_CalibrateCameraCharuco(handle);
                     Debug.Log("Calibration error: " + result);
                     calibrated = true;
                 }

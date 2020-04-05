@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class TrackerManager : MonoBehaviour
 {
     private Dictionary<string, TrackerBehavior> trackers = new Dictionary<string, TrackerBehavior>();
+    private Dictionary<string, TrackedObject> trackedObjects = new Dictionary<string, TrackedObject>();
 
     public void UpdateTrackers()
     {
@@ -14,6 +15,22 @@ public class TrackerManager : MonoBehaviour
             if(tracker.gameObject?.scene.name?.CompareTo("RealWorld") == 0){
                 trackers.Add(tracker.trackerName, tracker);
             }
+        }
+
+        foreach (TrackedObject tracked in Object.FindObjectsOfType(typeof(TrackedObject)))
+        {
+            if (tracked.gameObject?.scene.name?.CompareTo("ARWorld") == 0)
+            {
+                trackedObjects.Add(tracked.trackerName, tracked);
+            }
+        }
+    }
+
+    public void ForceUpdateTrackedObject()
+    {
+        foreach (TrackedObject tracked in trackedObjects.Values)
+        {
+            tracked.PerformUpdate();
         }
     }
 

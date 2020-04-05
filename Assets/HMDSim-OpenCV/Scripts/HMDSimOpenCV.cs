@@ -84,18 +84,18 @@ public class HMDSimOpenCV : MonoBehaviour
 
     public delegate int _Aruco_GetCalibrateResult_Type(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
 
-    public _RegisterDebugCallback_Type RegisterDebugCallback;
-    public _Aruco_DrawMarker_Type Aruco_DrawMarker;
-    public _Aruco_EstimateMarkersPoseWithDetector_Type Aruco_EstimateMarkersPoseWithDetector;
-    public _Aruco_EstimateMarkersPose_Type Aruco_EstimateMarkersPose;
-    public _Aruco_CreateDetector_Type Aruco_CreateDetector;
-    public _Aruco_DrawCharucoBoard_Type Aruco_DrawCharucoBoard;
-    public _Aruco_CollectCharucoCorners_Type Aruco_CollectCharucoCorners;
-    public _Aruco_CalibrateCameraCharuco_Type Aruco_CalibrateCameraCharuco;
-    public _Aruco_GetCalibrateResult_Type Aruco_GetCalibrateResult;
+    public static _RegisterDebugCallback_Type RegisterDebugCallback;
+    public static _Aruco_DrawMarker_Type Aruco_DrawMarker;
+    public static _Aruco_EstimateMarkersPoseWithDetector_Type Aruco_EstimateMarkersPoseWithDetector;
+    public static _Aruco_EstimateMarkersPose_Type Aruco_EstimateMarkersPose;
+    public static _Aruco_CreateDetector_Type Aruco_CreateDetector;
+    public static _Aruco_DrawCharucoBoard_Type Aruco_DrawCharucoBoard;
+    public static _Aruco_CollectCharucoCorners_Type Aruco_CollectCharucoCorners;
+    public static _Aruco_CalibrateCameraCharuco_Type Aruco_CalibrateCameraCharuco;
+    public static _Aruco_GetCalibrateResult_Type Aruco_GetCalibrateResult;
 
 #else
-
+    public delegate void DebugCallback(string message);
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern void RegisterDebugCallback(DebugCallback callback);
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
@@ -117,8 +117,7 @@ public class HMDSimOpenCV : MonoBehaviour
         float squareLength, float markerLength, bool border);
     
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
-    public static extern bool Aruco_DrawCharucoBoard(int predefinedDict, int squareWidth, int squareHeight, float squareLength, float markerLength, bool border,
-        byte[] rgbOutput);
+    public static extern bool Aruco_DrawCharucoBoard(int detectorHandle, byte[] rgbOutput);
     
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern int Aruco_CollectCharucoCorners(int detectorHandle, byte[] rgbInput, int width, int height, byte[] rgbOutput = null);

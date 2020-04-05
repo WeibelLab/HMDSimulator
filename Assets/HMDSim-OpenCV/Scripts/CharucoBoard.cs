@@ -88,9 +88,9 @@ public class CharucoBoard : MonoBehaviour
         if (needToGenerateAgain)
         {
             // draw the image
-            detectorHandle = HMDSimOpenCV.Instance.Aruco_CreateDetector((int) _oldDictionary, squareCount.x,
+            detectorHandle = HMDSimOpenCV.Aruco_CreateDetector((int) _oldDictionary, squareCount.x,
                 squareCount.y, squareResolution, markerResolution, true);
-            bool generatedWell = HMDSimOpenCV.Instance.Aruco_DrawCharucoBoard(detectorHandle, textureBuffer);
+            bool generatedWell = HMDSimOpenCV.Aruco_DrawCharucoBoard(detectorHandle, textureBuffer);
 
             // update the texture
             boardTexture.LoadRawTextureData(textureBuffer);

@@ -23,6 +23,7 @@ public class TranslationCallback
     };
 
     public Type type;
+#if UNITY_EDITOR
     [ConditionalHide("type", (int)Type.Constant, true)]
     public Vector3 constantOffset = Vector3.zero;
     [ConditionalHide("type", (int)Type.AccelDrift, true)]
@@ -35,6 +36,16 @@ public class TranslationCallback
     public CustomTranslationEvent customEvent;
 
     [HideInInspector] public Vector3 result;
+
+#else
+    public Vector3 constantOffset = Vector3.zero;
+    public float accelDriftFactor = 1.0f;
+    public Vector3 axisMagnitude = Vector3.one;
+    public int markerId;
+    public CustomTranslationEvent customEvent;
+
+    public Vector3 result;
+#endif
     private Vector3 p0;
     private Vector3 p1;
     private float t0 = -1;

@@ -34,6 +34,7 @@ public class DisplayProjection : MonoBehaviour
     // Update is called once per frame
     void OnPreRender()
     {
+        MainManager.Instance.trackerManager.ForceUpdateTrackedObject();
         height = 0.02;
         width = 0.04;
         eyePosition = eye.transform.position;

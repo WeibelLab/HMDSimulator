@@ -71,7 +71,7 @@ public class MarkerTracking : MonoBehaviour
 
             byte[] debugBuffer = new byte[width * height * 3];
 
-            int count = HMDSimOpenCV.Instance.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
+            int count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
                 (int) marker.MarkerDictionary, marker.markerSize, cameraCalibration.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, debugBuffer);
 
             debugTexture2D.LoadRawTextureData(debugBuffer);
@@ -87,6 +87,7 @@ public class MarkerTracking : MonoBehaviour
                     // Found the correct marker
                     pair.Value.position = new Vector3(posVecs[i * 3], posVecs[i * 3 + 1], posVecs[i * 3 + 2]);
                     pair.Value.posInWorld = cameraCalibration.trackableCamera.transform.TransformPoint(pair.Value.position);
+                    pair.Value.posInWorld = cameraCalibration.localToWorld.MultiplyPoint3x4(pair.Value.position);
                     //pair.Value.rotation = new Vector3();
                     //pair.Value.rotation.x = Mathf.Rad2Deg * rotVecs[i * 3] + 180;
                     //pair.Value.rotation.y = Mathf.Rad2Deg * rotVecs[i * 3 + 2];
@@ -121,9 +122,9 @@ public class MarkerTracking : MonoBehaviour
                     Matrix4x4 invertYM = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1, -1, 1));
 
                     //// Handness
-                    Matrix4x4 fixedMat = cameraCalibration.trackableCamera.transform.localToWorldMatrix * localMat * invertYM;
-                    Debug.Log(invertYM);
-                    Debug.Log(invertYM * switchAxis);
+                    Matrix4x4 fixedMat = cameraCalibration.localToWorld * localMat * invertYM;
+                    Debug.Log(cameraCalibration.localToWorld);
+                    Debug.Log(cameraCalibration.trackableCamera.transform.localToWorldMatrix);
                     Quaternion local = QuaternionFromMatrix(fixedMat);
                     //cameraCalibration.trackableCamera.transform.localToWorldMatrix * 
                     //Quaternion local = QuaternionFromMatrix(localMat);

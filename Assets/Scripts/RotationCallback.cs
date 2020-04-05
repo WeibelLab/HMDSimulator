@@ -21,7 +21,7 @@ public class RotationCallback
     };
 
     public Type type;
-
+#if UNITY_EDITOR
     [ConditionalHide("type", (int) Type.Constant, true)]
     public Vector3 constantOffset = Vector3.zero;
 
@@ -47,6 +47,17 @@ public class RotationCallback
     public CustomTranslationEvent customEvent;
 
     [HideInInspector] public Quaternion result;
+#else
+    public Vector3 constantOffset = Vector3.zero;
+    public Vector3 amplitude = Vector3.one;
+    public Vector3 frequency = Vector3.one;
+    public AnimationCurve curveX = new AnimationCurve();
+    public AnimationCurve curveY = new AnimationCurve();
+    public AnimationCurve curveZ = new AnimationCurve();
+    public int markerId;
+    public CustomTranslationEvent customEvent;
+    public Quaternion result;
+#endif
     private Quaternion q0;
     private Quaternion q1;
     private float t0 = -1;

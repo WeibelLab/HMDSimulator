@@ -17,7 +17,7 @@ public class TrackedObject : MonoBehaviour
         
     }
 
-    void PerformUpdate()
+    public void PerformUpdate()
     {
         TrackerBehavior tracker;
         if (MainManager.Instance.trackerManager.GetTracker(trackerName, out tracker))
@@ -41,7 +41,7 @@ public class TrackedObject : MonoBehaviour
         PerformUpdate();
     }
 
-    void Update()
+    void LateUpdate()
     {
         PerformUpdate();
     }

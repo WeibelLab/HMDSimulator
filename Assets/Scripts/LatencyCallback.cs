@@ -19,6 +19,7 @@ public class LatencyCallback
     };
 
     public Type type;
+#if UNITY_EDITOR
     [ConditionalHide("type", (int)Type.Constant, true)]
     public float constantOffset = 0;
     [ConditionalHide("type", (int)Type.SineWave, true)]
@@ -34,6 +35,14 @@ public class LatencyCallback
 
     [HideInInspector] public float result;
 
+#else
+    public float constantOffset = 0;
+    public float amplitude = 1;
+    public float frequency = 1;
+    public AnimationCurve curve = new AnimationCurve();
+    public CustomLatencyEvent customEvent;
+    public float result;
+#endif
     public float GetLatency()
     {
         float t = Time.fixedTime;

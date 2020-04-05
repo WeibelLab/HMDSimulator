@@ -71,7 +71,7 @@ public class ArucoMarker : MonoBehaviour
         if (needToGenerateAgain)
         {
             // draw the image
-            bool generatedWell = HMDSimOpenCV.Instance.Aruco_DrawMarker((int)_oldDictionary, _markerId, resolution, true, textureBuffer);
+            bool generatedWell = HMDSimOpenCV.Aruco_DrawMarker((int)_oldDictionary, _markerId, resolution, true, textureBuffer);
 
             // update the texture
             markerTexture.LoadRawTextureData(textureBuffer);

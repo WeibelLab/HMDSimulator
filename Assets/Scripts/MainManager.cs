@@ -50,14 +50,4 @@ public class MainManager : MonoBehaviour
         PerformUpdate();
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        PerformUpdate();
-    }
-
-    void LateUpdate()
-    {
-        PerformUpdate();
-    }
 }
