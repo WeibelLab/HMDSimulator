@@ -30,7 +30,10 @@ public class TrackerManager : MonoBehaviour
     {
         foreach (TrackedObject tracked in trackedObjects.Values)
         {
-            tracked.PerformUpdate();
+            if (tracked.isActiveAndEnabled)
+            {
+                tracked.PerformUpdate();
+            }
         }
     }
 

@@ -35,8 +35,8 @@ public class DisplayProjection : MonoBehaviour
     void OnPreRender()
     {
         MainManager.Instance.trackerManager.ForceUpdateTrackedObject();
-        height = 0.02;
-        width = 0.04;
+        height = 0.03;
+        width = 0.05;
         eyePosition = eye.transform.position;
         if (XRDevice.isPresent)
         {
