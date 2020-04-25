@@ -83,6 +83,8 @@ public class HMDSimOpenCV : MonoBehaviour
     public delegate double _Aruco_CalibrateCameraCharuco_Type(int detectorHandle);
 
     public delegate int _Aruco_GetCalibrateResult_Type(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
+    
+    public delegate float _SPAAM_Solve_Type(float[] alignments, int alignmentCount, float[] resultMatrix, bool affine, bool is3Dto2D, bool getError);
 
     public static _RegisterDebugCallback_Type RegisterDebugCallback;
     public static _Aruco_DrawMarker_Type Aruco_DrawMarker;
@@ -93,6 +95,7 @@ public class HMDSimOpenCV : MonoBehaviour
     public static _Aruco_CollectCharucoCorners_Type Aruco_CollectCharucoCorners;
     public static _Aruco_CalibrateCameraCharuco_Type Aruco_CalibrateCameraCharuco;
     public static _Aruco_GetCalibrateResult_Type Aruco_GetCalibrateResult;
+    public static _SPAAM_Solve_Type SPAAM_Solve;
 
 #else
     public delegate void DebugCallback(string message);
@@ -127,6 +130,9 @@ public class HMDSimOpenCV : MonoBehaviour
 
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern int Aruco_GetCalibrateResult(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
+
+    [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
+    public static extern float SPAAM_Solve(float[] alignments, int alignmentCount, float[] resultMatrix, bool affine, bool is3Dto2D, bool getError);
 
 #endif
 
@@ -168,6 +174,9 @@ public class HMDSimOpenCV : MonoBehaviour
         Aruco_GetCalibrateResult = NativeLibraryManager.GetDelegate<_Aruco_GetCalibrateResult_Type>(
             libraryHandle,
             "Aruco_GetCalibrateResult");
+        SPAAM_Solve = NativeLibraryManager.GetDelegate<_SPAAM_Solve_Type>(
+            libraryHandle,
+            "SPAAM_Solve"); 
         RegisterDebugCallback(new DebugCallback(DebugLog));
 #endif
 
