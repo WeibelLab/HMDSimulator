@@ -15,8 +15,8 @@ public class SPAAMTargetManager : MonoBehaviour
     public List<Vector3> targetPositions = new List<Vector3>();
     public List<Vector3> transformedTargetPosition = new List<Vector3>();
 
-    private int index = 0;
-    private Vector3 offset = new Vector3(100, 100, 100);
+    public int index = 0;
+    protected Vector3 offset = new Vector3(100, 100, 100);
 
     void Awake()
     {
@@ -29,7 +29,7 @@ public class SPAAMTargetManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    public void InitializePosition()
+    public virtual void InitializePosition()
     {
         transformedTargetPosition.Clear();
         for (int i = 0; i < targetPositions.Count; i++)
@@ -41,13 +41,13 @@ public class SPAAMTargetManager : MonoBehaviour
         DisplayCurrentTarget();
     }
 
-    void DisplayCurrentTarget()
+    protected virtual void DisplayCurrentTarget()
     {
         templateObject.SetActive(true);
         templateObject.transform.position = transformedTargetPosition[index];
     }
 
-    public Vector3 PerformAlignment()
+    public virtual Vector3 PerformAlignment()
     {
         Vector3 target = transformedTargetPosition[index] - offset;
         index = (index + 1) % transformedTargetPosition.Count;

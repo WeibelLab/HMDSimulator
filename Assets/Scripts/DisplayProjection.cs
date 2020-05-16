@@ -12,6 +12,9 @@ public class DisplayProjection : MonoBehaviour
     public bool isLeft = false;
     public float eyeSeperation = 0.007f;
     public bool setEysSeperation = false;
+    public bool once = false;
+
+    private bool init = false;
 
     private Matrix4x4 oldProj;
     private Matrix4x4 newProj;
@@ -20,15 +23,15 @@ public class DisplayProjection : MonoBehaviour
     private double width;
 
     private Vector3 eyePosition;
+    public Vector3 localPos;
 
     // Start is called before the first frame update
     void Start()
     {
         cam = GetComponent<Camera>();
         Debug.Log(name);
-        Debug.Log(cam.projectionMatrix);
+        //Debug.Log(cam.projectionMatrix);
         oldProj = cam.projectionMatrix;
-        
     }
 
     // Update is called once per frame
@@ -40,7 +43,7 @@ public class DisplayProjection : MonoBehaviour
         eyePosition = eye.transform.position;
         if (XRDevice.isPresent)
         {
-            Vector3 localPos;
+            
             if (isLeft)
             {
                 //localPos = UnityEngine.XR.InputTracking.GetLocalPosition(XRNode.LeftEye);
@@ -117,8 +120,20 @@ public class DisplayProjection : MonoBehaviour
         newProj = proj;//oldProj * offset;
         //newProj[0, 0] *= 1.0f;
         //newProj[1, 1] *= 1.0f;
-        
-        cam.projectionMatrix = newProj;
+
+        if (!once)
+        {
+            cam.projectionMatrix = newProj;
+        }
+        else
+        {
+            if (!init)
+            {
+                cam.projectionMatrix = newProj;
+                init = true;
+            }
+        }
+
         //cam.stereoSeparation
         //cam.SetStereoProjectionMatrix(Camera.StereoscopicEye.Left, );
     }

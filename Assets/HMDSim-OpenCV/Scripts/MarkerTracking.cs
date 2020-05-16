@@ -45,7 +45,7 @@ public class MarkerTracking : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void LateUpdate()
     {
         if (!cameraCalibration.calibrated)
         {
@@ -123,8 +123,8 @@ public class MarkerTracking : MonoBehaviour
 
                     //// Handness
                     Matrix4x4 fixedMat = cameraCalibration.localToWorld * localMat * invertYM;
-                    Debug.Log(cameraCalibration.localToWorld);
-                    Debug.Log(cameraCalibration.trackableCamera.transform.localToWorldMatrix);
+                    //Debug.Log(cameraCalibration.localToWorld);
+                    //Debug.Log(cameraCalibration.trackableCamera.transform.localToWorldMatrix);
                     Quaternion local = QuaternionFromMatrix(fixedMat);
                     //cameraCalibration.trackableCamera.transform.localToWorldMatrix * 
                     //Quaternion local = QuaternionFromMatrix(localMat);

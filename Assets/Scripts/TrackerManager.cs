@@ -8,18 +8,18 @@ public class TrackerManager : MonoBehaviour
     private Dictionary<string, TrackerBehavior> trackers = new Dictionary<string, TrackerBehavior>();
     private Dictionary<string, TrackedObject> trackedObjects = new Dictionary<string, TrackedObject>();
 
-    public void UpdateTrackers()
+    public void UpdateTrackers(string realName, string arName)
     {
         foreach (TrackerBehavior tracker in Object.FindObjectsOfType(typeof(TrackerBehavior)))
         {
-            if(tracker.gameObject?.scene.name?.CompareTo("RealWorld") == 0){
+            if(tracker.gameObject?.scene.name?.CompareTo(realName) == 0){
                 trackers.Add(tracker.trackerName, tracker);
             }
         }
 
         foreach (TrackedObject tracked in Object.FindObjectsOfType(typeof(TrackedObject)))
         {
-            if (tracked.gameObject?.scene.name?.CompareTo("ARWorld") == 0)
+            if (tracked.gameObject?.scene.name?.CompareTo(arName) == 0)
             {
                 trackedObjects.Add(tracked.trackerName, tracked);
             }

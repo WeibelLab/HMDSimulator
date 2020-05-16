@@ -20,7 +20,7 @@ public class SPAAMSolver : MonoBehaviour
     public List<Alignment> groundTruthAlignments = new List<Alignment>();
     public List<Alignment> manualAlignments = new List<Alignment>();
 
-    public void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
+    public virtual void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
     {
         Alignment manualAlignment = new Alignment
         {
@@ -39,18 +39,18 @@ public class SPAAMSolver : MonoBehaviour
     }
 
 
-    public void Solve()
+    public virtual void Solve()
     {
         // TODO: Send info to opencv and solve the linear equation
-        Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
-        groundTruth = SolveAlignment(groundTruthAlignments, true);
-        //Matrix4x4 manual = SolveAlignment(manualAlignments, true);
+        //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
+        groundTruthEquation = SolveAlignment(groundTruthAlignments, true);
+        manualEquation = SolveAlignment(manualAlignments, true);
         Debug.Log("LocalToWorld:" + TrackerBase.localToWorldMatrix);
         groundTruthAlignments.Clear();
         manualAlignments.Clear();
     }
 
-    Matrix4x4 SolveAlignment(List<Alignment> alignments, bool affine = true)
+    protected virtual Matrix4x4 SolveAlignment(List<Alignment> alignments, bool affine = true)
     {
         // input parameters
         int alignmentCount = alignments.Count;

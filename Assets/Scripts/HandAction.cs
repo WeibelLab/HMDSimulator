@@ -76,7 +76,7 @@ public class HandAction : MonoBehaviour
 
     public void GripDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
-        Debug.Log("gripdown");
+        //Debug.Log("gripdown");
         if (fromSource == handType)
         {
             if (!spaamTargetManager.initialized)
