@@ -14,15 +14,8 @@ public class SPAAMEvalTargetManager : SPAAMTargetManager
     public DisplayProjection dp;
     public Transform targetSphere;
     public Text textOverlay;
-    public bool useGroundTruth = false;
-    private SPAAM2DSolver solver;
     private int lastIndex = 0;
     private Vector2 canvasSize;
-
-    public void SetSolver(SPAAM2DSolver solver)
-    {
-        this.solver = solver;
-    }
 
     public override void InitializePosition()
     {
@@ -72,14 +65,13 @@ public class SPAAMEvalTargetManager : SPAAMTargetManager
         template.gameObject.SetActive(false);
     }
 
-
-    void Update()
+    protected override void update()
     {
         if (solver && solver.solved)
         {
             textOverlay.gameObject.SetActive(true);
             textOverlay.transform.parent = template.transform;
-            template.color = new Color(0,0,1,1);
+            template.color = new Color(0, 0, 1, 1);
             template.gameObject.SetActive(true);
             Vector4 hPoint = camera.transform.InverseTransformPoint(targetSphere.position);
             hPoint.w = 1.0f;
@@ -101,5 +93,10 @@ public class SPAAMEvalTargetManager : SPAAMTargetManager
 
             Debug.Log("Error:" + (groundTruthResult - manualResult).magnitude);
         }
+    }
+
+    void Update()
+    {
+        update();
     }
 }

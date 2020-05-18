@@ -10,13 +10,22 @@ public class SPAAMTargetManager : MonoBehaviour
 
     public GameObject camera;
     public GameObject templateObject;
+    public GameObject displayObject;
+    public TrackedObject targetTrackedObject;
     public bool initialized = false;
 
     public List<Vector3> targetPositions = new List<Vector3>();
     public List<Vector3> transformedTargetPosition = new List<Vector3>();
 
+    public bool useGroundTruth = false;
     public int index = 0;
     protected Vector3 offset = new Vector3(100, 100, 100);
+
+    protected SPAAMSolver solver;
+    public void SetSolver(SPAAMSolver solver)
+    {
+        this.solver = solver;
+    }
 
     void Awake()
     {
@@ -55,6 +64,34 @@ public class SPAAMTargetManager : MonoBehaviour
         return target;
     }
 
+    protected virtual void update()
+    {
+        if (solver && solver.solved)
+        {
+            if (!displayObject.activeInHierarchy)
+            {
+                displayObject.SetActive(true);
+            }
+
+            Vector4 hPoint = targetTrackedObject.transform.position;
+            hPoint.w = 1.0f;
+
+            Vector3 groundTruthResult = solver.groundTruthEquation * hPoint;
+            Vector3 manualResult = solver.manualEquation * hPoint;
+
+            if (useGroundTruth)
+            {
+                displayObject.transform.position = groundTruthResult + offset;
+            }
+            else
+            {
+                displayObject.transform.position = manualResult + offset;
+            }
+
+            Debug.Log("Error:" + (groundTruthResult - manualResult).magnitude);
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -64,6 +101,6 @@ public class SPAAMTargetManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        update();
     }
 }

@@ -32,9 +32,7 @@ public class SPAAM2DSolver : SPAAMSolver
     public Transform cameraTracker;
     public Transform display;
     public Vector3 offsetVector3;
-    public bool solved = false;
 
-    private SPAAMEvalTargetManager manager;
     private Vector3 debug1;
     private Vector3 debug2;
 
@@ -87,9 +85,9 @@ public class SPAAM2DSolver : SPAAMSolver
         {
             manager = (SPAAMEvalTargetManager)SPAAMTargetManager.Instance;
             manager.SetSolver(this);
-            cameraSpace = manager.displayCanvas.worldCamera;
+            cameraSpace = ((SPAAMEvalTargetManager)manager).displayCanvas.worldCamera;
         }
-        offsetVector3 = manager.dp.localPos;
+        offsetVector3 = ((SPAAMEvalTargetManager)manager).dp.localPos;
         //Debug.DrawRay(camera.position, debug1, Color.blue);
         //Debug.DrawRay(camera.position, debug2, Color.green);
 

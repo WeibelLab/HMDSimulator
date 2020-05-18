@@ -16,9 +16,12 @@ public class SPAAMSolver : MonoBehaviour
     public Transform TrackerBase;
     public Matrix4x4 groundTruthEquation;
     public Matrix4x4 manualEquation;
+    public bool solved = false;
 
     public List<Alignment> groundTruthAlignments = new List<Alignment>();
     public List<Alignment> manualAlignments = new List<Alignment>();
+
+    protected SPAAMTargetManager manager;
 
     public virtual void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
     {
@@ -48,6 +51,7 @@ public class SPAAMSolver : MonoBehaviour
         Debug.Log("LocalToWorld:" + TrackerBase.localToWorldMatrix);
         groundTruthAlignments.Clear();
         manualAlignments.Clear();
+        solved = true;
     }
 
     protected virtual Matrix4x4 SolveAlignment(List<Alignment> alignments, bool affine = true)
@@ -85,5 +89,14 @@ public class SPAAMSolver : MonoBehaviour
         Debug.Log("Result Matrix is: " + result);
 
         return result;
-    } 
+    }
+
+    void Update()
+    {
+        if (!manager)
+        {
+            manager = SPAAMTargetManager.Instance;
+            manager.SetSolver(this);
+        }
+    }
 }

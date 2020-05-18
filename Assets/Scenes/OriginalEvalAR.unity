@@ -360,6 +360,7 @@ MonoBehaviour:
   isLeft: 0
   eyeSeperation: 0.007
   setEysSeperation: 0
+  once: 0
   localPos: {x: 0, y: 0, z: 0}
   texture: {fileID: 0}
 --- !u!20 &276798031
@@ -1121,9 +1122,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 1983262251}
   templateObject: {fileID: 0}
+  displayObject: {fileID: 0}
+  targetTrackedObject: {fileID: 0}
   initialized: 0
   targetPositions: []
   transformedTargetPosition: []
+  useGroundTruth: 0
   index: 0
   count: {x: 5, y: 5}
   dist: {x: 0.2, y: 0.2}
@@ -1134,7 +1138,6 @@ MonoBehaviour:
   dp: {fileID: 1971154992}
   targetSphere: {fileID: 505040676}
   textOverlay: {fileID: 1064230543}
-  useGroundTruth: 0
 --- !u!4 &1934930703
 Transform:
   m_ObjectHideFlags: 0
@@ -1199,6 +1202,7 @@ MonoBehaviour:
   isLeft: 1
   eyeSeperation: 0.007
   setEysSeperation: 0
+  once: 0
   localPos: {x: 0, y: 0, z: 0}
   texture: {fileID: 0}
 --- !u!20 &1971154993
