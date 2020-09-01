@@ -39,7 +39,7 @@ public class DisplayProjection : MonoBehaviour
     {
         MainManager.Instance.trackerManager.ForceUpdateTrackedObject();
         height = 0.03;
-        width = 0.05;
+        width = 0.0568;
         eyePosition = eye.transform.position;
         if (XRDevice.isPresent)
         {
@@ -99,7 +99,7 @@ public class DisplayProjection : MonoBehaviour
             //Debug.Log(center);
         }
 
-        center *= 0.985f;
+        //center *= 0.985f;
 
         double left = center.x - width / 2.0;
         double right = center.x + width / 2.0;
@@ -117,7 +117,7 @@ public class DisplayProjection : MonoBehaviour
         bottom *= scale;
         Matrix4x4 proj = Matrix4x4.Frustum((float)left, (float)right, (float)bottom, (float)top, (float)near, (float)far);
 
-        newProj = proj;//oldProj * offset;
+        newProj = proj * offset;//oldProj * offset;
         //newProj[0, 0] *= 1.0f;
         //newProj[1, 1] *= 1.0f;
 
