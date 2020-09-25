@@ -86,7 +86,7 @@ public class HandAction : MonoBehaviour
             else
             {
                 Vector3 targetPosition = spaamTargetManager.PerformAlignment();
-                Vector3 objectPosition = calibrationCube.localPosition;
+                Vector3 objectPosition = calibrationCube.position; //TODO
                 spaamSolver.PerformAlignment(objectPosition, targetPosition);
             }
         }

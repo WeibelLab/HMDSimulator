@@ -17,13 +17,16 @@ public class DisplayProjection : MonoBehaviour
     private bool init = false;
 
     private Matrix4x4 oldProj;
-    private Matrix4x4 newProj;
+    public Matrix4x4 newProj;
+    public Matrix4x4 newProjWithoutOffset;
 
     private double height;
     private double width;
 
-    private Vector3 eyePosition;
+    public Vector3 eyePosition;
     public Vector3 localPos;
+    public Transform eyeEst;
+    public Transform len;
 
     // Start is called before the first frame update
     void Start()
@@ -88,11 +91,20 @@ public class DisplayProjection : MonoBehaviour
             eyePosition = eye.transform.TransformPoint(localPos);
         }
 
+        transform.position = eyePosition;
+        transform.rotation = len.rotation;
+
         Vector3 dir = eyePosition - transform.position;
+        //Debug.Log(dir.ToString("G6"));
         //Quaternion rot = Quaternion.FromToRotation(Vector3.forward, dir);
         Matrix4x4 offset = Matrix4x4.Translate(dir);
         
-        Vector3 center = -transform.InverseTransformPoint(eyePosition);
+        Vector3 center = transform.InverseTransformPoint(len.position);
+
+        if (eyeEst)
+        {
+            eyeEst.transform.localPosition = new Vector3(0,0,0);//-center;
+        }
 
         if (name == "Left")
         {
@@ -107,7 +119,7 @@ public class DisplayProjection : MonoBehaviour
         double bottom = center.y - height / 2.0;
 
         double near = 0.01;
-        double far = 500.0;
+        double far = 1000.0;
         double dist = Mathf.Abs(center.z);
 
         double scale = near / dist;
@@ -115,21 +127,21 @@ public class DisplayProjection : MonoBehaviour
         right *= scale;
         top *= scale;
         bottom *= scale;
-        Matrix4x4 proj = Matrix4x4.Frustum((float)left, (float)right, (float)bottom, (float)top, (float)near, (float)far);
 
-        newProj = proj * offset;//oldProj * offset;
+        newProjWithoutOffset = Matrix4x4.Frustum((float)left, (float)right, (float)bottom, (float)top, (float)near, (float)far);
+        newProj = newProjWithoutOffset * offset;//oldProj * offset;
         //newProj[0, 0] *= 1.0f;
         //newProj[1, 1] *= 1.0f;
 
         if (!once)
         {
-            cam.projectionMatrix = newProj;
+            cam.projectionMatrix = newProjWithoutOffset;
         }
         else
         {
             if (!init)
             {
-                cam.projectionMatrix = newProj;
+                cam.projectionMatrix = newProjWithoutOffset;
                 init = true;
             }
         }

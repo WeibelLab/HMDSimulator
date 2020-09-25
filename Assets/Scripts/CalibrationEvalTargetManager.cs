@@ -8,6 +8,8 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
     public Vector2 dist;
     public List<Vector2> targetPositions2D = new List<Vector2>();
     public Transform targetSphere;
+    public Transform targetCrosshair;
+    public Transform calibrationArea;
 
     public Canvas[] displayCanvas;
     public SpriteRenderer[] template;
@@ -23,7 +25,10 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
     private int other = 1;
     public int[] indices = new int[2];
     public Vector3[] targetPositionsOutput = new Vector3[2];
+    public Transform[] eyeEst = new Transform[2];
     private CalibrationEvaluation.Pattern pattern;
+
+    public float testVal = 0;
 
     public override void InitializePosition()
     {
@@ -45,12 +50,13 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
             dots[side][indices[side]].color = new Color(1, 1, 0, 1);
             dots[other][lastIndex[other]].color = new Color(1, 0, 0, 1);
         }
-        else if(pattern == CalibrationEvaluation.Pattern.Stereo_SPAAM)
+        else if(pattern == CalibrationEvaluation.Pattern.Stereo_SPAAM || pattern == CalibrationEvaluation.Pattern.Stylus_mark)
         {
-            dots[0][lastIndex[side]].color = new Color(1, 0, 0, 1);
-            dots[0][indices[side]].color = new Color(1, 1, 0, 1);
-            dots[1][lastIndex[side]].color = new Color(1, 0, 0, 1);
-            dots[1][indices[side]].color = new Color(1, 1, 0, 1);
+            //dots[0][lastIndex[side]].color = new Color(1, 0, 0, 1);
+            //dots[0][indices[side]].color = new Color(1, 1, 0, 1);
+            //dots[1][lastIndex[side]].color = new Color(1, 0, 0, 1);
+            //dots[1][indices[side]].color = new Color(1, 1, 0, 1);
+            targetCrosshair.localPosition = new Vector3(targetPositions2D[indices[side]].x / 5.0f, targetPositions2D[indices[side]].y / 5.0f, ((CalibrationEvaluation)solver).currentDist);
         }
     }
 
@@ -69,11 +75,13 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
         {
             for (int i = 0; i < 2; i++)
             {
-                targetPositionsOutput[i] = targetPositions2D[indices[i]];
+                //targetPositionsOutput[i] = targetPositions2D[indices[i]];
                 lastIndex[i] = indices[i];
-                indices[i] = (indices[i] + 1) % dots[i].Count;
+                indices[i] = (indices[i] + 1) % targetPositions2D.Count;
             }
+            Vector3 ret = targetCrosshair.position - new Vector3(100, 100, 100);
             DisplayCurrentTarget();
+            return ret;
         }
 
         return target;
@@ -84,14 +92,26 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
         switch (p)
         {
             case CalibrationEvaluation.Pattern.SPAAM:
+
+                targetCrosshair.gameObject.SetActive(false);
                 SwitchTargetPosition(false);
                 break;
+            case CalibrationEvaluation.Pattern.Depth_SPAAM:
+
+                targetCrosshair.gameObject.SetActive(false);
+                SwitchTargetPosition(true);
+                break;
             case CalibrationEvaluation.Pattern.Stereo_SPAAM:
+                //calibrationArea.GetComponent<TrackedObject>().enabled = false;
+
+                targetCrosshair.gameObject.SetActive(true);
                 SwitchTargetPosition(true, true);
                 break;
-            case CalibrationEvaluation.Pattern.Depth_SPAAM:
             case CalibrationEvaluation.Pattern.Stylus_mark:
-                SwitchTargetPosition(true);
+
+                targetCrosshair.gameObject.SetActive(true);
+                //calibrationArea.GetComponent<TrackedObject>().enabled = true;
+                SwitchTargetPosition(true, true);
                 break;
         }
 
@@ -149,27 +169,32 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
         float step = 0.1f;
 
         float baseGap = 0.0f;
-        float gapStep = 0.01f;
+        float gapStep = 0.001f;
 
         for (int i = 0; i < targetPositions2D.Count; i++)
         {
             Vector2 curr = targetPositions2D[i];
-            dots[0].Add(Instantiate(template[0], displayCanvas[0].transform));
-            
-            dots[1].Add(Instantiate(template[1], displayCanvas[1].transform));
+
+            //dots[0].Add(Instantiate(template[0], displayCanvas[0].transform));
+
+            //dots[1].Add(Instantiate(template[1], displayCanvas[1].transform));
 
             if (size)
             {
-                float oldSize = dots[0][i].transform.localScale.x;
-                float newSize = oldSize * (baseSize - i * step);
-                dots[0][i].transform.localPosition = new Vector3((curr.x - i * gapStep) * canvasSize[0].x, curr.y * canvasSize[0].y, 0);
-                dots[1][i].transform.localPosition = new Vector3((curr.x + i * gapStep) * canvasSize[1].x, curr.y * canvasSize[1].y, 0);
+                //float oldSize = dots[0][i].transform.localScale.x;
+                //float newSize = oldSize * (baseSize - i * step);
+                //dots[0][i].transform.localPosition = new Vector3((curr.x - i * gapStep) * canvasSize[0].x, curr.y * canvasSize[0].y, 0);
+                //dots[1][i].transform.localPosition = new Vector3((curr.x + i * gapStep) * canvasSize[1].x, curr.y * canvasSize[1].y, 0);
 
-                dots[0][i].transform.localScale = new Vector3(newSize, newSize, 1);
-                dots[1][i].transform.localScale = new Vector3(newSize, newSize, 1);
+                //dots[0][i].transform.localScale = new Vector3(newSize, newSize, 1);
+                //dots[1][i].transform.localScale = new Vector3(newSize, newSize, 1);
             }
             else
             {
+                dots[0].Add(Instantiate(template[0], displayCanvas[0].transform));
+
+                dots[1].Add(Instantiate(template[1], displayCanvas[1].transform));
+
                 dots[0][i].transform.localPosition = new Vector3((curr.x) * canvasSize[0].x, curr.y * canvasSize[0].y, 0);
                 dots[1][i].transform.localPosition = new Vector3((curr.x) * canvasSize[1].x, curr.y * canvasSize[1].y, 0);
 
@@ -195,8 +220,13 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
 
     }
 
+    void FixedUpdate()
+    {
+        
+    }
     protected override void update()
     {
+        
         if (solver && solver.solved)
         {
             for (int side = 0; side < 2; side++)
@@ -210,9 +240,38 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
                 Vector3 groundTruthResult = ((CalibrationEvaluation) solver).groundTruthEquationBoth[side] * hPoint;
                 groundTruthResult.x = groundTruthResult.x / groundTruthResult.z * canvasSize[side].x; //
                 groundTruthResult.y = groundTruthResult.y / groundTruthResult.z * canvasSize[side].y; //
-                Vector3 manualResult = ((CalibrationEvaluation) solver).manualEquationBoth[side] * hPoint;
+                Vector3 manualResult = ((CalibrationEvaluation)solver).manualEquationBoth[side] * hPoint;
                 manualResult.x = manualResult.x / manualResult.z * canvasSize[side].x; //
                 manualResult.y = manualResult.y / manualResult.z * canvasSize[side].y; //
+
+                //hPoint = dp[side].transform.InverseTransformPoint(targetSphere.position);
+                ////hPoint.x += dp[side].localPos.x;
+                //Vector3 manualResult = dp[side].newProj * hPoint;
+                //if (side == 0)
+                //{
+                //    Debug.Log(manualResult);
+                //}
+
+                //manualResult.x = (manualResult.x / -manualResult.z) * canvasSize[side].x; //
+                //manualResult.y = (manualResult.y / -manualResult.z) * canvasSize[side].y; //
+
+                //// === Without matrix
+                //Vector3 direction = targetSphere.position - eyeEst[side].position;
+
+                //Vector3 dirToLen = dp[side].transform.InverseTransformDirection(direction.normalized);
+                //dirToLen /= dirToLen.z;
+                //dirToLen *= Mathf.Abs(eyeEst[side].localPosition.z);
+                ////Debug.Log(dirToLen);
+                //Vector3 manualResult = dirToLen + eyeEst[side].localPosition;
+
+                //manualResult.x /= (0.0568f / 2.0f);
+                //manualResult.y /= 0.015f;
+                ////Debug.Log(manualResult);
+
+                //manualResult.x = (manualResult.x) * canvasSize[side].x; //
+                //manualResult.y = (manualResult.y) * canvasSize[side].y; //
+
+
 
                 if (useGroundTruth)
                 {
@@ -224,6 +283,7 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
                 }
 
                 Debug.Log("Error:" + (groundTruthResult - manualResult).magnitude);
+                ((CalibrationEvaluation)solver).SetError(manualResult - groundTruthResult, side);
             }
         }
         else

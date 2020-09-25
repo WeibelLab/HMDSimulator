@@ -33,6 +33,7 @@ public class CalibrationEvaluation : SPAAMSolver
 
     public Camera[] cameraSpaceBoth = new Camera[2];
     public Transform cameraTracker;
+    public Transform calibrationArea;
     public Transform[] displayBoth = new Transform[2];
     public Vector3[] offsetVector3Both = new Vector3[2];
 
@@ -107,15 +108,37 @@ public class CalibrationEvaluation : SPAAMSolver
         {
             for (int i = 0; i < 2; i++)
             {
-                targetPosition = ceManager.targetPositionsOutput[i];
+                Vector3 newTargetPosition = targetPosition;
+                if (pattern == Pattern.Stereo_SPAAM)
+                {
+                    //targetPosition = ceManager.targetPositionsOutput[i];
+                }
+
+                Vector3 dir = newTargetPosition - Camera.main.transform.TransformPoint(offsetVector3Both[i]);
+                Vector3 localEye = displayBoth[i]
+                    .InverseTransformPoint(Camera.main.transform.TransformPoint(offsetVector3Both[i]));
+                Vector3 dirToLen = displayBoth[i].transform.InverseTransformDirection(dir.normalized);
+                dirToLen /= dirToLen.z;
+                dirToLen *= Mathf.Abs(localEye.z);
+                //Debug.Log(dirToLen * 1000);
+                Vector3 manualResult = dirToLen + localEye;
+                manualResult.x /= (0.0568f / 2.0f);
+                manualResult.y /= 0.015f;
+                manualResult.z = 0;
+                newTargetPosition = manualResult;
+
+                //ceManager.displayTemplate[i].gameObject.SetActive(true);
+                //ceManager.displayTemplate[i].transform.localPosition = new Vector3(newTargetPosition.x * 1024, newTargetPosition.y * 540, 0);
+
+                //Debug.Log(manualResult * 1000);
 
                 Alignment manualAlignment = new Alignment
                 {
                     objectPosition = objectPosition,
-                    targetPosition = targetPosition
+                    targetPosition = newTargetPosition
                 };
 
-                Vector3 direction = new Vector3(targetPosition.x * 0.0568f / 2.0f, targetPosition.y * 0.015f, 0);
+                Vector3 direction = new Vector3(newTargetPosition.x * 0.0568f / 2.0f, newTargetPosition.y * 0.015f, 0);
 
                 direction = displayBoth[i].TransformPoint(direction) -
                             Camera.main.transform.TransformPoint(offsetVector3Both[i]);
@@ -132,22 +155,48 @@ public class CalibrationEvaluation : SPAAMSolver
                 Alignment groundTruthAlignment = new Alignment
                 {
                     objectPosition = Camera.main.transform.TransformPoint(offsetVector3Both[i]) + direction * dist,
-                    targetPosition = targetPosition
+                    targetPosition = newTargetPosition
                 };
 
+                Debug.Log("====================");
+                Debug.Log("manualObject:" + manualAlignment.objectPosition.ToString("G4"));
+                Debug.Log("groundTruthObject:" + groundTruthAlignment.objectPosition.ToString("G4"));
+                Debug.Log("target:" + groundTruthAlignment.targetPosition.ToString("G4"));
+                Debug.Log("=====");
                 manualAlignment.objectPosition = cameraTracker.InverseTransformPoint(manualAlignment.objectPosition);
                 groundTruthAlignment.objectPosition =
                     cameraTracker.InverseTransformPoint(groundTruthAlignment.objectPosition);
 
                 manualAlignmentsBoth[i].Add(manualAlignment);
                 groundTruthAlignmentsBoth[i].Add(groundTruthAlignment);
-
+                Debug.Log("manualObject:" + manualAlignment.objectPosition.ToString("G4"));
+                Debug.Log("groundTruthObject:" + groundTruthAlignment.objectPosition.ToString("G4"));
+                Debug.Log("target:" + groundTruthAlignment.targetPosition.ToString("G4"));
             }
         }
 
         //Debug.Log(groundTruthAlignment.objectPosition);
     }
 
+    void ResetPattern()
+    {
+        expResult = new ExperimentResult();
+        lastIndices[0] = -1;
+        lastIndices[1] = -1;
+        solved = false;
+        side = 0;
+        ceManager.ConditionChange(pattern);
+    }
+
+    void FixedUpdate()
+    {
+        if (pattern == Pattern.Stereo_SPAAM)
+        {
+            calibrationArea.position = cameraTracker.transform.position;
+            calibrationArea.rotation = cameraTracker.transform.rotation;
+
+        }
+    }
 
     void Update()
     {
@@ -164,21 +213,20 @@ public class CalibrationEvaluation : SPAAMSolver
                 sp.lockPosition = false;
             }
 
-            lastIndices[0] = -1;
-            lastIndices[1] = -1;
-            solved = false;
-            side = 0;
-            ceManager.ConditionChange(pattern);
+            ResetPattern();
         }
 
         if (Input.GetKeyDown(KeyCode.C))
         {
             // Reset condition
-            lastIndices[0] = -1;
-            lastIndices[1] = -1;
-            solved = false;
-            side = 0;
-            ceManager.ConditionChange(pattern);
+            ResetPattern();
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            // TODO: Store expResult
+            string time = System.DateTime.UtcNow.ToString("HH_mm_dd_MMMM_yyyy");
+            ExperimentResult.SaveToDrive(expResult, "D://test//result_"+ time +".json");
         }
 
         if (!ceManager)
@@ -203,10 +251,11 @@ public class CalibrationEvaluation : SPAAMSolver
                     case Pattern.SPAAM:
                         break;
                     case Pattern.Depth_SPAAM:
-                    case Pattern.Stereo_SPAAM:
                         currentDist = minDist + magicDistLookupList[ceManager.indices[side]] * step;
                         break;
+                    case Pattern.Stereo_SPAAM:
                     case Pattern.Stylus_mark:
+                        currentDist = minDist - 1.1f + magicDistLookupList[ceManager.indices[side]] * step * 0.5f;
                         break;
                 }
 
@@ -219,16 +268,35 @@ public class CalibrationEvaluation : SPAAMSolver
         }
     }
 
+    public void SetError(Vector3 error, int index)
+    {
+        if (index == 0)
+        {
+            expResult.errorLeft = error;
+        }
+        else
+        {
+            expResult.errorRight = error;
+        }
+    }
+
     public override void Solve()
     {
         // TODO: Send info to opencv and solve the linear equation
         //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
-        Debug.Log("Ground Truth");
+        //Debug.Log("Ground Truth");
         groundTruthEquationBoth[0] = SolveAlignment(groundTruthAlignmentsBoth[0], true, true);
         groundTruthEquationBoth[1] = SolveAlignment(groundTruthAlignmentsBoth[1], true, true);
-        Debug.Log("Manual");
+        //Debug.Log("Manual");
         manualEquationBoth[0] = SolveAlignment(manualAlignmentsBoth[0], true, false);
         manualEquationBoth[1] = SolveAlignment(manualAlignmentsBoth[1], true, false);
+
+        expResult.groundTruthProjectionMatrixLeft = groundTruthEquationBoth[0];
+        expResult.groundTruthProjectionMatrixRight = groundTruthEquationBoth[1];
+        expResult.projectionMatrixLeft = manualEquationBoth[0];
+        expResult.projectionMatrixRight = manualEquationBoth[1];
+
+
         //Debug.Log("LocalToWorld:" + TrackerBase.localToWorldMatrix);
         groundTruthAlignmentsBoth[0].Clear();
         groundTruthAlignmentsBoth[1].Clear();
@@ -284,6 +352,8 @@ public class CalibrationEvaluation : SPAAMSolver
             Debug.Log("Condition number is: " + conditionNumber);
             Debug.Log("Offset is: " + resultOffset);
             Debug.Log("Result Matrix is: " + result);
+
+
         }
         else
         {
@@ -292,7 +362,6 @@ public class CalibrationEvaluation : SPAAMSolver
             resultOffsetGT.y = resultMatrix[15];
             resultOffsetGT.z = resultMatrix[16];
             resultOffsetGT.w = resultMatrix[17];
-
 
             Debug.Log("Condition number is: " + conditionNumberGT);
             Debug.Log("Offset is: " + resultOffsetGT);
