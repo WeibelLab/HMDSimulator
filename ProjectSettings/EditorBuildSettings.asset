@@ -11,10 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Main.unity
     guid: 1dc984fe22ba16c41ad6f344e5f449d8
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/DefaultAR.unity
     guid: 4c7b2fee38202bf4984dbd5f275e3b41
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/DefaultReal.unity
     guid: 702e2ad7ce8ee70458c1889b2d438c42
   - enabled: 0
@@ -29,10 +29,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/OriginalEvalReal.unity
     guid: dc2bffcb85f97ea47a38cc780dd648d7
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/ArucoEvalAR.unity
     guid: fda075aad107657428decf4bcd21cac3
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/ArucoEvalReal.unity
     guid: 75c4f9439ee17724b8dfe32f21febbb6
   - enabled: 1
