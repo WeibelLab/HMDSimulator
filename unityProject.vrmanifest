@@ -5,7 +5,7 @@
       "app_key": "application.generated.unity.simulator.exe",
       "launch_type": "url",
       "url": "steam://launch/",
-      "action_manifest_path": "F:\\users\\DESKTOP\\Documents\\GitHub\\HMDSimulator\\actions.json",
+      "action_manifest_path": "C:\\Users\\danilo\\projects\\HMDSimulator\\HMDSimulator\\actions.json",
       "strings": {
         "en_us": {
           "name": "Simulator [Testing]"
