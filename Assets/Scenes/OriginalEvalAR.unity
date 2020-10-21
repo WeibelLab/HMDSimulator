@@ -426,6 +426,8 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 0
+  height: 0.03
+  width: 0.05
   eyePosition: {x: 0, y: 0, z: 0}
   localPos: {x: 0, y: 0, z: 0}
   eyeEst: {fileID: 0}
@@ -1335,6 +1337,8 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 0
+  height: 0.03
+  width: 0.05
   eyePosition: {x: 0, y: 0, z: 0}
   localPos: {x: 0, y: 0, z: 0}
   eyeEst: {fileID: 0}

@@ -20,8 +20,8 @@ public class DisplayProjection : MonoBehaviour
     public Matrix4x4 newProj;
     public Matrix4x4 newProjWithoutOffset;
 
-    private double height;
-    private double width;
+    public double height = 0.03;
+    public double width = 0.0568;
 
     public Vector3 eyePosition;
     public Vector3 localPos;
@@ -41,8 +41,6 @@ public class DisplayProjection : MonoBehaviour
     void OnPreRender()
     {
         MainManager.Instance.trackerManager.ForceUpdateTrackedObject();
-        height = 0.03;
-        width = 0.0568;
         eyePosition = eye.transform.position;
         if (XRDevice.isPresent)
         {
