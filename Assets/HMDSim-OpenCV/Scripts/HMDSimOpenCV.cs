@@ -141,8 +141,6 @@ public class HMDSimOpenCV : MonoBehaviour
     void Awake()
     {
 
-        Debug.Log(String.Format("[HMDSimOpenCV] Starting OpenCV extension.... Expecting to find DLLs at {0}", Application.dataPath + LIB_PATH));
-        Debug.Log("[HMDSimOpenCV] Starting OpenCV extension....");
 
         if (_instance != null && _instance != this)
         {
@@ -150,6 +148,8 @@ public class HMDSimOpenCV : MonoBehaviour
         }
 
 #if UNITY_EDITOR
+
+        Debug.Log(String.Format("[HMDSimOpenCV] Dynamically loading OpenCV extension.... Expecting to find DLLs at {0}", Application.dataPath + LIB_PATH));
 
         // Open native library
         libraryHandle = NativeLibraryManager.OpenLibrary(Application.dataPath + LIB_PATH);
