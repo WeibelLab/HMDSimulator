@@ -1,11 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
+
+/// <summary>
+/// CameraCalibration is a helper class used calibrating virtual cameras 
+/// through computer vision.
+///  
+/// For example,i n the Virtual-Augmented Reality simulator, we use it for
+/// calibrating the headset's "locatable" camera.
+/// 
+/// This helper class plays two important roles:
+///  1) Connecting a Unity virtual camera to an external calibration routine
+///  2) Generating a calibration matrix based on the virtual camera's parameters
+///  3) Quickly switching from a possibly imperfect calibration to the ground truth calibration
+/// 
+/// Besides those three mean roles, this class has additonal features that can help one
+/// debug the calibration process: 
+///  - A debug view that shows what the camera has seen
+///  - A live view of the camera
+/// 
+/// </summary>
 public class CameraCalibration : MonoBehaviour
 {
     public CharucoBoard chBoard;
+
     public Camera trackableCamera;
     public RenderTexture cameraTexture;
     public Texture2D image;
@@ -76,7 +95,7 @@ public class CameraCalibration : MonoBehaviour
                     int result = HMDSimOpenCV.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, debugBuffer);
                     debugTexture2D.LoadRawTextureData(debugBuffer);
                     debugTexture2D.Apply();
-                    //debugQuad.material.mainTexture = debugTexture2D;
+                    debugQuad.material.mainTexture = debugTexture2D;
                     Debug.Log("Collect corners result: " + result);
                 }
             }
