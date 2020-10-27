@@ -6,32 +6,11 @@ using Object = System.Object;
 
 public class MarkerTracking : MonoBehaviour
 {
-    [Serializable]
-    public class MarkerData
-    {
-        public ArucoMarker marker;
-        public Vector3 position = new Vector3(1000, 1000, 1000);
-        public Vector3 posInWorld = new Vector3(1000, 1000, 1000);
-        public Vector3 rotation;
-        public Quaternion rotInWorld;
-        public bool found = false;
-    }
+    [Header("Camera calibration")]
+    [Tooltip("CharucoCameraCalibration helper class that holds the calibration for the camera used by Marker Tracking")]
+    public CharucoCameraCalibration cameraCalibrationHelper;
 
-    [Serializable]
-    public class NamedMarkerData
-    {
-        public int markerId;
-        public MarkerData markerData;
-    }
-
-    [Header("Camera")]
-    [Tooltip("CameraCalibration helper class that holds the calibration for the camera used by Marker Tracking")]
-    public CameraCalibration cameraCalibration;
-
-    [Header("Tracked Markers")]
-    public List<NamedMarkerData> trackedMarkers;
-    public int expectedMarkerCount = 16;
-    private Dictionary<int, MarkerData> _trackedMarkers = new Dictionary<int, MarkerData>();
+    [Header("Markers Axis")]
     public Matrix4x4 switchAxis;
 
     [Header("Debugging")]
@@ -40,25 +19,136 @@ public class MarkerTracking : MonoBehaviour
     public Texture2D debugTexture2D;
     public Renderer debugQuad;
 
-    // Start is called before the first frame update
-    void Start()
+    // code responsible for managing markers being tracked (min of two always)
+    private int expectedMarkerCount = 2;
+    private float[] posVecs = new float[3 * 2], rotVecs = new float[9 * 2];
+    private int[] markerIds = new int[2];
+
+    private Dictionary<int, ArucoMarker> _trackedMarkers = new Dictionary<int, ArucoMarker>();
+    
+    // keeps count of unique aruco families and aruco sizes as each <Family,Size> requires a detection pass
+    private Dictionary<int, Dictionary<float, HashSet<ArucoMarker>>> _familyMarkerLength = new Dictionary<int, Dictionary<float, HashSet<ArucoMarker>>>();
+
+    private void UpdateMarkerLengthMap()
     {
-        // Build dictionary
-        foreach (var markers in trackedMarkers)
+
+    }
+
+    private void UpdateTemporaryLists()
+    {
+        // finds the first power of two greater than the number of markers being tracked
+        int lowestPowerOfTwoGreaterThanMarkerCount = _trackedMarkers.Count + 2;
+        if (!((lowestPowerOfTwoGreaterThanMarkerCount & (lowestPowerOfTwoGreaterThanMarkerCount - 1)) == 0))
         {
-            _trackedMarkers.Add(markers.markerId, markers.markerData);
+            int p = 1;
+            while (p < lowestPowerOfTwoGreaterThanMarkerCount)
+                p <<= 1;
+            lowestPowerOfTwoGreaterThanMarkerCount = p;
         }
+
+        // new markers were added
+        if (lowestPowerOfTwoGreaterThanMarkerCount != expectedMarkerCount)
+        {
+            expectedMarkerCount = lowestPowerOfTwoGreaterThanMarkerCount;
+
+            posVecs = new float[3 * expectedMarkerCount];
+            rotVecs = new float[9 * expectedMarkerCount];
+            markerIds = new int[expectedMarkerCount];
+        }
+
+    }
+
+    public bool StartTrackingMarker(ArucoMarker marker)
+    {
+        if (marker == null) return false;
+        if (_trackedMarkers.ContainsKey(marker.markerId))
+        {
+            // unfortunately we can only track one ID
+            Debug.LogWarning(String.Format("[MarkerTracking] Already tracking marker with id {0} ({1})!", marker.markerId, _trackedMarkers[marker.markerId].transform.name));
+            return false;
+        }
+
+        Debug.Log(String.Format("[MarkerTracking] Tracking marker with id {0} ({1})!", marker.markerId, marker.transform.name));
+        _trackedMarkers.Add(marker.markerId, marker);
+
+        // update lists used to request markers dectected in the image
+        UpdateTemporaryLists();
+
+        // update the number of times we should look for markers
+        Dictionary<float, HashSet<ArucoMarker>> markersPerSize;
+        if (!_familyMarkerLength.TryGetValue((int)marker.MarkerDictionary, out markersPerSize))
+        {
+            markersPerSize = new Dictionary<float, HashSet<ArucoMarker>>();
+            _familyMarkerLength.Add((int)marker.MarkerDictionary, markersPerSize);
+        }
+
+        HashSet<ArucoMarker> markersWithSameLength;
+        if (!markersPerSize.TryGetValue(marker.markerSize, out markersWithSameLength))
+        {
+            markersWithSameLength = new HashSet<ArucoMarker>();
+        }
+
+        // makes sure that this aruco marker is accounted
+        markersWithSameLength.Add(marker);
+
+        return true;
+    }
+
+    public bool StopTrackingMarker(ArucoMarker marker)
+    {
+        if (marker == null) return false;
+        if (!_trackedMarkers.ContainsKey(marker.markerId))
+        {
+            // unfortunately we can only track one ID
+            Debug.LogWarning(String.Format("[MarkerTracking] Not tracking marker with id {0} ({1})!", marker.markerId, _trackedMarkers[marker.markerId].transform.name));
+            return false;
+        }
+
+        Debug.Log(String.Format("[MarkerTracking] *Not* tracking marker with id {0} ({1})!", marker.markerId, marker.transform.name));
+        _trackedMarkers.Remove(marker.markerId);
+
+        // update lists used to request markers dectected in the image
+        UpdateTemporaryLists();
+
+        // update the number of times we should look for markers
+        Dictionary<float, HashSet<ArucoMarker>> markersPerSize;
+        if (!_familyMarkerLength.TryGetValue((int)marker.MarkerDictionary, out markersPerSize))
+        {
+            // weird... shouldn't happen
+            return true;
+        }
+
+        HashSet<ArucoMarker> markersWithSameLength;
+        if (!markersPerSize.TryGetValue(marker.markerSize, out markersWithSameLength))
+        {
+            // weird.. shouldn't happen
+            return true;
+        }
+
+        // makes sure that this aruco marker is accounted
+        markersWithSameLength.Remove(marker);
+        if (markersWithSameLength.Count == 0)
+        {
+            markersPerSize.Remove(marker.markerSize);
+            
+            if (markersPerSize.Count == 0)
+            {
+                _familyMarkerLength.Remove((int)marker.MarkerDictionary);
+            }
+        }
+
+        return true;
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        if (!cameraCalibration.calibrated)
+        if (!cameraCalibrationHelper.calibrated)
         {
             return;
         }
 
-        Texture2D image = cameraCalibration.image;
+        Texture2D image = cameraCalibrationHelper.locatableCamera.lastRenderedFrame;
         byte[] rgbBuffer = image.GetRawTextureData();
         int width = image.width;
         int height = image.height;
@@ -81,7 +171,7 @@ public class MarkerTracking : MonoBehaviour
             {
                 byte[] debugBuffer = new byte[width * height * 3];
                 count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
-                        (int)marker.MarkerDictionary, marker.markerSize, cameraCalibration.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, debugBuffer);
+                        (int)marker.MarkerDictionary, marker.markerSize, cameraCalibrationHelper.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, debugBuffer);
                 debugTexture2D.LoadRawTextureData(debugBuffer);
                 debugTexture2D.Apply();
                 debugQuad.material.mainTexture = debugTexture2D;
@@ -89,7 +179,7 @@ public class MarkerTracking : MonoBehaviour
             else
             {
                 count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
-                        (int)marker.MarkerDictionary, marker.markerSize, cameraCalibration.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, null);
+                        (int)marker.MarkerDictionary, marker.markerSize, cameraCalibrationHelper.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, null);
             }
 
             bool found = false;
@@ -98,10 +188,12 @@ public class MarkerTracking : MonoBehaviour
             {
                 if (markerIds[i] == marker.markerId)
                 {
-                    // Found the correct marker
+                    // Found the correct marker in the camera space
                     pair.Value.position = new Vector3(posVecs[i * 3], posVecs[i * 3 + 1], posVecs[i * 3 + 2]);
-                    pair.Value.posInWorld = cameraCalibration.trackableCamera.transform.TransformPoint(pair.Value.position);
-                    pair.Value.posInWorld = cameraCalibration.localToWorld.MultiplyPoint3x4(pair.Value.position);
+
+                    // goes from the camera coordinate system to the global coordinate system
+                    pair.Value.posInWorld = cameraCalibrationHelper.locatableCamera.transform.TransformPoint(pair.Value.position);
+                    pair.Value.posInWorld = cameraCalibrationHelper.locatableCamera.lastFrameLocalToWorld.MultiplyPoint3x4(pair.Value.position);
                     //pair.Value.rotation = new Vector3();
                     //pair.Value.rotation.x = Mathf.Rad2Deg * rotVecs[i * 3] + 180;
                     //pair.Value.rotation.y = Mathf.Rad2Deg * rotVecs[i * 3 + 2];
@@ -136,7 +228,7 @@ public class MarkerTracking : MonoBehaviour
                     Matrix4x4 invertYM = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1, -1, 1));
 
                     //// Handness
-                    Matrix4x4 fixedMat = cameraCalibration.localToWorld * localMat * invertYM;
+                    Matrix4x4 fixedMat = cameraCalibrationHelper.locatableCamera.lastFrameLocalToWorld * localMat * invertYM;
                     //Debug.Log(cameraCalibration.localToWorld);
                     //Debug.Log(cameraCalibration.trackableCamera.transform.localToWorldMatrix);
                     Quaternion local = QuaternionFromMatrix(fixedMat);
@@ -169,12 +261,12 @@ public class MarkerTracking : MonoBehaviour
             }
             else
             {
-                Debug.Log("Cannot find markerId: " + tcb.markerId);
+                Debug.LogError("[MarkerTracking] Cannot find markerId: " + tcb.markerId);
             }
         }
         else
         {
-            Debug.Log("Cannot cast obj");
+            Debug.LogError("[MarkerTracking] Cannot cast obj");
         }
 
     }
@@ -191,13 +283,13 @@ public class MarkerTracking : MonoBehaviour
             }
             else
             {
-                Debug.Log("Cannot find markerId: " + rcb.markerId);
+                Debug.LogError("[MarkerTracking] Cannot find markerId: " + rcb.markerId);
             }
 
         }
         else
         {
-            Debug.Log("Cannot cast obj");
+            Debug.LogError("[MarkerTracking] Cannot cast obj");
         }
     }
 

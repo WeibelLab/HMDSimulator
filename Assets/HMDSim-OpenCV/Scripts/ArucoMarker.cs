@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
-
+using UnityEngine.Networking;
 
 /// <summary>
 /// ArucoMarker is a portable version of teh ArucoMarker
@@ -12,6 +13,10 @@ using UnityEngine;
 public class ArucoMarker : MonoBehaviour
 {
 
+    [Header("Simulator Detection")]
+    public MarkerTracking markerTrackingManager;
+
+    [Header("Marker configuration")]
     public int resolution = 512;
     //public bool border = true; (disabling this for now)
     public HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY MarkerDictionary = HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY.DICT_5X5_250;
@@ -20,6 +25,20 @@ public class ArucoMarker : MonoBehaviour
 
     private byte[] textureBuffer;
     Texture2D markerTexture;
+
+    [Header("Marker data")]
+
+    MarkerData trackedMarkerData = new MarkerData();
+
+    [Serializable]
+    public class MarkerData
+    {
+        public Vector3 position = new Vector3(1000, 1000, 1000);
+        public Vector3 posInWorld = new Vector3(1000, 1000, 1000);
+        public Vector3 rotation;
+        public Quaternion rotInWorld;
+        public bool found = false;
+    }
 
 
     private int _markerId = -1;
@@ -34,6 +53,14 @@ public class ArucoMarker : MonoBehaviour
 
 
         UpdateMarkerSettings();
+    }
+
+    public void OnDisable()
+    {
+        if (markerTrackingManager != null)
+        {
+            markerTrackingManager.
+        }
     }
 
     public void UpdateMarkerSettings()
