@@ -43,7 +43,7 @@ public class ArucoMarker : MonoBehaviour
 
 
     private int _markerId = -1;
-    public float _markerSize = 0.001f; // 10 cm
+    private float _markerSize = 0.001f; // 10 cm
 
     private HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY _oldDictionary;
     private bool registeredForTracking = false;
