@@ -21,14 +21,15 @@ public class ArucoMarker : MonoBehaviour
     //public bool border = true; (disabling this for now)
     public HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY MarkerDictionary = HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY.DICT_5X5_250;
     public int markerId = 42;
-    public float markerSize = 1.0f;
+    [Tooltip("Marker size in meters")]
+    public float markerSize = 0.10f; // 10 cm
 
     private byte[] textureBuffer;
     Texture2D markerTexture;
 
     [Header("Marker data")]
 
-    MarkerData trackedMarkerData = new MarkerData();
+    public MarkerData trackedMarkerData = new MarkerData();
 
     [Serializable]
     public class MarkerData
@@ -42,7 +43,10 @@ public class ArucoMarker : MonoBehaviour
 
 
     private int _markerId = -1;
+    public float _markerSize = 0.001f; // 10 cm
+
     private HMDSimOpenCV.ARUCO_PREDEFINED_DICTIONARY _oldDictionary;
+    private bool registeredForTracking = false;
 
     private void OnEnable()
     {
@@ -51,15 +55,24 @@ public class ArucoMarker : MonoBehaviour
         if (resolution < 25 || resolution > 4096)
             resolution = 512;
 
+        if (markerSize <= 0.0f)
+            markerSize = 0.10f;
 
         UpdateMarkerSettings();
+
+        // register marker if not registered due new marker settings
+        if (!registeredForTracking && markerTrackingManager != null)
+        {
+            registeredForTracking = markerTrackingManager.StartTrackingMarker(this);
+        }
     }
 
     public void OnDisable()
     {
-        if (markerTrackingManager != null)
+        if (registeredForTracking && markerTrackingManager != null)
         {
-            markerTrackingManager.
+            markerTrackingManager.StopTrackingMarker(this);
+            registeredForTracking = false;
         }
     }
 
@@ -85,19 +98,25 @@ public class ArucoMarker : MonoBehaviour
         }
 
         if (markerId != _markerId)
-        {
-            _markerId = markerId;
             needToGenerateAgain = true;
-        }
 
         if (MarkerDictionary != _oldDictionary)
-        {
-            _oldDictionary = MarkerDictionary;
             needToGenerateAgain = true;
-        }
 
         if (needToGenerateAgain)
         {
+            // remove old marker from the tracked list
+            if (registeredForTracking && markerTrackingManager != null)
+            { 
+                markerTrackingManager.StopTrackingMarker(this);
+                registeredForTracking = false;
+            }
+
+            // update values
+            _markerSize = markerSize;
+            _markerId = markerId;
+            _oldDictionary = MarkerDictionary;
+
             // draw the image
             bool generatedWell = HMDSimOpenCV.Aruco_DrawMarker((int)_oldDictionary, _markerId, resolution, true, textureBuffer);
 
@@ -105,12 +124,34 @@ public class ArucoMarker : MonoBehaviour
             markerTexture.LoadRawTextureData(textureBuffer);
             markerTexture.Apply();
 
+
             if (generatedWell)
             {
                 Debug.Log(string.Format("[ArucoMarker] Generated marker id={0} ({1}) with {2}x{2}", _markerId, _oldDictionary.ToString(), resolution));
+
+                if (!registeredForTracking && markerTrackingManager != null)
+                {
+                    markerTrackingManager.StartTrackingMarker(this);
+                    registeredForTracking = true;
+                }
             } else
             {
                 Debug.LogError(string.Format("[ArucoMarker] Error generating marker id={0} ({1}) with {2}x{2}", _markerId, _oldDictionary.ToString(), resolution));
+            }
+        } else
+        {
+            // we do not need to generate a new marker, but perhaps we need to update tracking status?
+            if (_markerSize != markerSize)
+            {
+                // updates marker length
+                _markerSize = markerSize;
+
+                if (registeredForTracking && markerTrackingManager != null)
+                {
+                    markerTrackingManager.StopTrackingMarker(this);
+                    markerTrackingManager.StartTrackingMarker(this);
+                }
+
             }
         }
 
