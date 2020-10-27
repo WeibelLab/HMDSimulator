@@ -4,6 +4,7 @@ using UnityEngine;
 
 
 /// <summary>
+/// ArucoMarker is a portable version of teh ArucoMarker
 /// This class is responsible for showing an ArucoMarker on Unity Editor / Game
 /// so that it can be tracked by locatable cameras in the simulator
 /// </summary>

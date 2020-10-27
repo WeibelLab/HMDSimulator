@@ -10,7 +10,7 @@ public class MarkerTracking : MonoBehaviour
     public class MarkerData
     {
         public ArucoMarker marker;
-        public Vector3 position = new Vector3(1000,1000,1000);
+        public Vector3 position = new Vector3(1000, 1000, 1000);
         public Vector3 posInWorld = new Vector3(1000, 1000, 1000);
         public Vector3 rotation;
         public Quaternion rotInWorld;
@@ -24,15 +24,21 @@ public class MarkerTracking : MonoBehaviour
         public MarkerData markerData;
     }
 
+    [Header("Camera")]
+    [Tooltip("CameraCalibration helper class that holds the calibration for the camera used by Marker Tracking")]
     public CameraCalibration cameraCalibration;
 
-
+    [Header("Tracked Markers")]
     public List<NamedMarkerData> trackedMarkers;
     public int expectedMarkerCount = 16;
     private Dictionary<int, MarkerData> _trackedMarkers = new Dictionary<int, MarkerData>();
+    public Matrix4x4 switchAxis;
+
+    [Header("Debugging")]
+    [Tooltip("If checked, a debug texture showing internals of tracking will be displayed on debugQuad")]
+    public bool debug = false;
     public Texture2D debugTexture2D;
     public Renderer debugQuad;
-    public Matrix4x4 switchAxis;
 
     // Start is called before the first frame update
     void Start()
@@ -69,14 +75,22 @@ public class MarkerTracking : MonoBehaviour
                 debugTexture2D = new Texture2D(width, height, TextureFormat.RGB24, false);
             }
 
-            byte[] debugBuffer = new byte[width * height * 3];
 
-            int count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
-                (int) marker.MarkerDictionary, marker.markerSize, cameraCalibration.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, debugBuffer);
-
-            debugTexture2D.LoadRawTextureData(debugBuffer);
-            debugTexture2D.Apply();
-            debugQuad.material.mainTexture = debugTexture2D;
+            int count;
+            if (debug && debugQuad != null)
+            {
+                byte[] debugBuffer = new byte[width * height * 3];
+                count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
+                        (int)marker.MarkerDictionary, marker.markerSize, cameraCalibration.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, debugBuffer);
+                debugTexture2D.LoadRawTextureData(debugBuffer);
+                debugTexture2D.Apply();
+                debugQuad.material.mainTexture = debugTexture2D;
+            }
+            else
+            {
+                count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
+                        (int)marker.MarkerDictionary, marker.markerSize, cameraCalibration.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, null);
+            }
 
             bool found = false;
 

@@ -23,25 +23,55 @@ using UnityEngine;
 /// </summary>
 public class CameraCalibration : MonoBehaviour
 {
+
+    [Tooltip("Camera that will be calibrated")]
+    public Camera trackableCamera;
+
+    [Tooltip("Camera's texture")]
+    public RenderTexture cameraTexture;
+
+    [HideInInspector]
+    public Texture2D image;
+
+    [Header("Calibration approach")]
+    // todo: remove this direct dependency
     public CharucoBoard chBoard;
 
-    public Camera trackableCamera;
-    public RenderTexture cameraTexture;
-    public Texture2D image;
+    [Header("Camera extrinsics")]
+    [Tooltip("The matrix transformation from the world to the camera local")]
     public Matrix4x4 worldToLocal;
-    public Matrix4x4 localToWorld;
-    public Renderer debugQuad;
 
-    public Texture2D debugTexture2D;
+    [Tooltip("The matrix transformation from the camera local coordinate system to the world")]
+    public Matrix4x4 localToWorld;
+
+    [Header("Camera Intrinsics")]
+    float bla;
+
+    [Header("Calibration results")]
+    [Tooltip("If true, the camera has been calibrated")]
     public bool calibrated = false;
 
+    [Tooltip("If calibrated, the calibration error gets saved here")]
+    double calibrationError = 0.0f;
+    
+    [Header("Debugging")]
+    [Tooltip("If true, and if supported by the underlying calibration interface, debugQuad gets filled with a texture that helps understand calibration")]
+    public bool debug = false;
+
+    [Tooltip("If debug is set, the debugQuad is used to show an internal status of a calibration routine")]
+    public Renderer debugQuad;
+   
+    [Tooltip("The matrix transformation from the camera local coordinate system to the world")]
+    public Texture2D debugTexture2D;
+
+
+    // Private variables
     private int width;
     private int height;
 
     // Start is called before the first frame update
     void Start()
     {
-
         width = cameraTexture.width;
         height = cameraTexture.height;
         image = new Texture2D(width, height, TextureFormat.RGB24, false);
@@ -66,12 +96,15 @@ public class CameraCalibration : MonoBehaviour
             //Camera.main.targetTexture = cameraTexture;
             //Camera.main.Render();
             //Camera.main.targetTexture = oldTargetTexture;
-
             var old = RenderTexture.active;
+            
+            // renders the locatable camera
             RenderTexture.active = cameraTexture;
             image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             image.Apply();
             RenderTexture.active = null;
+
+            // updates the transforms for the locatable camera
             worldToLocal = trackableCamera.transform.worldToLocalMatrix;
             localToWorld = trackableCamera.transform.localToWorldMatrix;
         }
@@ -90,16 +123,32 @@ public class CameraCalibration : MonoBehaviour
                     byte[] rgbBuffer = image.GetRawTextureData();
                     int width = image.width;
                     int height = image.height;
-                    byte[] debugBuffer = new byte[width * height * 3];
-                    debugTexture2D = new Texture2D(width, height, TextureFormat.RGB24, false);
-                    int result = HMDSimOpenCV.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, debugBuffer);
-                    debugTexture2D.LoadRawTextureData(debugBuffer);
-                    debugTexture2D.Apply();
-                    debugQuad.material.mainTexture = debugTexture2D;
-                    Debug.Log("Collect corners result: " + result);
+
+
+                    int result;
+                    if (debug && debugQuad != null)
+                    {
+                        if (!debugTexture2D || width != debugTexture2D.width || height != debugTexture2D.height)
+                        {
+                            debugTexture2D = new Texture2D(width, height, TextureFormat.RGB24, false);
+                        }
+
+                        byte[] debugBuffer = new byte[width * height * 3];
+                        result = HMDSimOpenCV.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, debugBuffer);
+                        debugTexture2D.LoadRawTextureData(debugBuffer);
+                        debugTexture2D.Apply();
+                        debugQuad.material.mainTexture = debugTexture2D;
+                    } else
+                    {
+                        result = HMDSimOpenCV.Aruco_CollectCharucoCorners(handle, rgbBuffer, width, height, null);
+                    }
+
+                    Debug.Log("[CameraCalibration] Collect corners result: " + result);
                 }
             }
         }
+
+        
         if (Input.GetKeyDown(KeyCode.P))
         {
             if (chBoard)
@@ -107,15 +156,17 @@ public class CameraCalibration : MonoBehaviour
                 int handle = chBoard.detectorHandle;
                 if (handle >= 0)
                 {
-                    double result = HMDSimOpenCV.Aruco_CalibrateCameraCharuco(handle);
-                    Debug.Log("Calibration error: " + result);
+                    calibrationError = HMDSimOpenCV.Aruco_CalibrateCameraCharuco(handle);
+                    Debug.Log("[CameraCalibration] Calibration error: " + calibrationError);
                     calibrated = true;
                 }
             }
         }
-        //if (chBoard)
-        //{
-        //    chBoard.detectorHandle
-        //}
+    }
+
+    // applies a custom intrinsic matrix to the camera
+    public void ApplyCustomCalibrationMatrix()
+    {
+        //trackableCamera.projectionMatrix
     }
 }
