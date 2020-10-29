@@ -1,18 +1,32 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+
+/// <summary>
+/// NativeLibraryManager is a helper library that loads & unloads DLLs dynamically in the editor
+/// 
+/// This library is very useful in situations when you are constantly changing a library, and you
+/// don't want to restart Unity for every single change.
+/// </summary>
 public class NativeLibraryManager
 {
 
 
 #if UNITY_EDITOR_WIN
 
-	[DllImport("kernel32")]
+	[DllImport("kernel32", EntryPoint = "LoadLibrary", SetLastError = true)]
 	public static extern IntPtr LoadLibrary(
 		string path);
+
+	[DllImport("kernel32.dll", SetLastError = true)]
+	static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hReservedNull, int dwFlags);
+
+	[DllImport("kernel32.dll", SetLastError = true)]
+	static extern bool SetDllDirectory(string lpPathName);
 
 	[DllImport("kernel32")]
 	public static extern IntPtr GetProcAddress(
@@ -31,10 +45,21 @@ public class NativeLibraryManager
 
 	public static IntPtr OpenLibrary(string path)
 	{
-        Debug.Log("Loading: " + path);
+        Debug.Log("[NativeLibraryManager] Loading: " + path);
+		int error = 0;
+
+		if (!SetDllDirectory(Path.GetFullPath(Path.GetDirectoryName(path))))
+        {
+			error = Marshal.GetLastWin32Error();
+			Debug.LogError(String.Format("[NativeLibraryManager] Unable to add path {0} to the library search path: {1}", Path.GetFullPath(Path.GetDirectoryName(path)), error));
+		}
+
 		IntPtr handle = LoadLibrary(path);
+		error = Marshal.GetLastWin32Error();
 		if (handle == IntPtr.Zero)
 		{
+			
+			Debug.LogError(String.Format("[NativeLibraryManager] Could not load library {0} : {1}",path, error));
 			throw new Exception("Couldn't open native library: " + path);
 		}
 		return handle;
@@ -42,9 +67,9 @@ public class NativeLibraryManager
 
 	public static bool CloseLibrary(IntPtr libraryHandle)
 	{
-        Debug.Log("Unloading");
+        Debug.Log("[NativeLibraryManager] Unloading... ");
 		bool flag = FreeLibrary(libraryHandle);
-        Debug.Log(flag + ":" + NativeLibraryManager.GetLastError());
+        Debug.Log(flag + ":" + Marshal.GetLastWin32Error() + ":" + NativeLibraryManager.GetLastError());
         return flag;
     }
 
