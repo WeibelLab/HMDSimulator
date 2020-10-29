@@ -55,7 +55,7 @@ public class RotationCallback
     public AnimationCurve curveX = new AnimationCurve();
     public AnimationCurve curveY = new AnimationCurve();
     public AnimationCurve curveZ = new AnimationCurve();
-    public int markerId;
+    public ArucoMarker marker;
     public CustomTranslationEvent customEvent;
     public Quaternion result;
 #endif
