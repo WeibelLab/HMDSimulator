@@ -19,7 +19,6 @@ public class TranslationCallback
         Constant,
         AccelDrift,
         AxisMagnitude,
-        CustomArUcoMarker,
         Custom
     };
 
@@ -31,10 +30,9 @@ public class TranslationCallback
     public float accelDriftFactor = 1.0f;
     [ConditionalHide("type", (int)Type.AxisMagnitude, true)]
     public Vector3 axisMagnitude = Vector3.one;
-
-    // we added this to show how we can use an existing GenericTracker with a custom tracker
-    [ConditionalHide("type", (int)Type.CustomArUcoMarker, true)]
-    public ArucoMarker marker;
+    
+    [ConditionalHide("type", (int)Type.Custom, true)]
+    public ArucoMarker marker; // we added this to show how we can use an existing GenericTracker with a custom tracker
 
     [ConditionalHide("type", (int)Type.Custom, true)]
     public CustomTranslationEvent customEvent;
@@ -110,6 +108,7 @@ public class TranslationCallback
                     result = orig;
                 }
                 break;
+
             case Type.Custom:
                 customEvent.Invoke(this);
                 break;

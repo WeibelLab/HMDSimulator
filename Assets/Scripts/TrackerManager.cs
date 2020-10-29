@@ -10,6 +10,7 @@ public class TrackerManager : MonoBehaviour
 
     public void UpdateTrackers(string realName, string arName)
     {
+        // only allow trackers in the VR scene
         foreach (TrackerBehavior tracker in Object.FindObjectsOfType(typeof(TrackerBehavior)))
         {
             if(tracker.gameObject?.scene.name?.CompareTo(realName) == 0){
@@ -17,6 +18,7 @@ public class TrackerManager : MonoBehaviour
             }
         }
 
+        // only allow tracked objects in the AR scene
         foreach (TrackedObject tracked in Object.FindObjectsOfType(typeof(TrackedObject)))
         {
             if (tracked.gameObject?.scene.name?.CompareTo(arName) == 0)

@@ -75,6 +75,7 @@ public class CharucoCameraCalibration : MonoBehaviour
 
     IEnumerator ApplyCustomCalibrationMatrix()
     {
+        Debug.Log("[CharucoCameraCalibration] Applying custom calibration matrix in 5...");
         yield return new WaitForSeconds(5);
 
         if (ApplyCustomCalibrationMatrixOnStart)
@@ -94,6 +95,7 @@ public class CharucoCameraCalibration : MonoBehaviour
                 bool result = HMDSimOpenCV.Aruco_SetCameraIntrinsics(chBoard.detectorHandle, CustomCalibrationMatrix, CustomDistCoeffs, CustomDistCoeffs.Length);
                 if (result)
                 {
+                    calibrated = true;
                     Debug.Log("[CharucoCameraCalibration] Applied custom calibration matrix");
                 }
                 else

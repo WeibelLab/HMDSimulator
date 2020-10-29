@@ -91,10 +91,18 @@ public class LocatableCamera : MonoBehaviour
             var old = RenderTexture.active;
 
             // renders the locatable camera
+            var oldTexture = trackableCamera.targetTexture;
+            //trackableCamera.targetTexture = cameraTexture;
+            trackableCamera.targetTexture = cameraTexture;
             RenderTexture.active = cameraTexture;
+            
+            trackableCamera.Render();
             lastRenderedFrame.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             lastRenderedFrame.Apply();
-            RenderTexture.active = null;
+
+            trackableCamera.targetTexture = oldTexture;
+            RenderTexture.active = old;
+            
 
             // saves frame number
             lastFrameNumber = Time.frameCount;

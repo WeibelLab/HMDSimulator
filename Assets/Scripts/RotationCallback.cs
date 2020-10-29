@@ -17,7 +17,6 @@ public class RotationCallback
         Constant,
         SineWave,
         Curve,
-        CustomArUco,
         Custom
     };
 
@@ -41,7 +40,7 @@ public class RotationCallback
     [ConditionalHide("type", (int) Type.Curve, true)]
     public AnimationCurve curveZ = new AnimationCurve();
 
-    [ConditionalHide("type", (int)Type.CustomArUco, true)]
+    [ConditionalHide("type", (int)Type.Custom, true)]
     public ArucoMarker marker;
 
     [ConditionalHide("type", (int) Type.Custom, true)]

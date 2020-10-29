@@ -23,6 +23,7 @@ public class MarkerTracking : MonoBehaviour
     private int expectedMarkerCount = 2;
     private float[] posVecs = new float[3 * 2], rotVecs = new float[9 * 2];
     private int[] markerIds = new int[2];
+    private byte[] debugBuffer;
 
     // keeps a list of unique markers tracked per dictionary (we can only track one ID per dictionary)
     private Dictionary<int, Dictionary<int, ArucoMarker>> _trackedMarkers = new Dictionary<int, Dictionary<int, ArucoMarker>>();
@@ -100,6 +101,7 @@ public class MarkerTracking : MonoBehaviour
         if (!markersPerSize.TryGetValue(marker.markerSize, out markersWithSameLength))
         {
             markersWithSameLength = new HashSet<ArucoMarker>();
+            markersPerSize.Add(marker.markerSize, markersWithSameLength);
         }
 
         // makes sure that this aruco marker is accounted
@@ -177,15 +179,15 @@ public class MarkerTracking : MonoBehaviour
         }
 
         // get camera image
-        Texture2D image = cameraCalibrationHelper.locatableCamera.lastRenderedFrame;
-        byte[] rgbBuffer = image.GetRawTextureData();
-        int width = image.width;
-        int height = image.height;
+        int width = cameraCalibrationHelper.locatableCamera.lastRenderedFrame.width;
+        int height = cameraCalibrationHelper.locatableCamera.lastRenderedFrame.height;
+        byte[] rgbBuffer = cameraCalibrationHelper.locatableCamera.lastRenderedFrame.GetRawTextureData();
 
         // create debug texture
         if (debug && (!debugTexture2D || width != debugTexture2D.width || height != debugTexture2D.height))
         {
             debugTexture2D = new Texture2D(width, height, TextureFormat.RGB24, false);
+            debugBuffer = new byte[width * height * 3];
         }
 
         // prepare for detection
@@ -206,7 +208,7 @@ public class MarkerTracking : MonoBehaviour
                 int count = 0;
                 if (debug && debugQuad != null)
                 {
-                    byte[] debugBuffer = new byte[width * height * 3];
+                    
                     count = HMDSimOpenCV.Aruco_EstimateMarkersPoseWithDetector(rgbBuffer, width, height,
                             markerDictionary, markerSize, cameraCalibrationHelper.chBoard.detectorHandle, expectedMarkerCount, posVecs, rotVecs, markerIds, debugBuffer);
                     debugTexture2D.LoadRawTextureData(debugBuffer);
@@ -228,6 +230,7 @@ public class MarkerTracking : MonoBehaviour
                         ArucoMarker marker;
                         if (!markersPerFamily.TryGetValue(markerIds[i], out marker))
                         {
+                            //Debug.LogWarning("We don't care about "+ markerIds[i]);
                             continue; // found a marker that we don't care about
                         }
 
@@ -249,10 +252,17 @@ public class MarkerTracking : MonoBehaviour
                         marker.trackedMarkerData.rotInWorld = localRotation;
                         marker.trackedMarkerData.found = true;
                     }
-                } else
+                } else if (count != 0)
                 {
-                    Debug.LogError("Found not Markers!");
+                    if (count == -1)
+                    {
+                        Debug.LogError("[MarkerTracking] Internal error - check logs!");
+                    } else if (count == -2)
+                    {
+                        Debug.LogError("[MarkerTracking] An exception was thrown while detecting markers - check logs!");
+                    }
                 }
+                
             }
         }
     }
@@ -270,6 +280,7 @@ public class MarkerTracking : MonoBehaviour
             if (_trackedMarkers.TryGetValue((int)tcb.marker.MarkerDictionary, out markersInFamily) && markersInFamily.ContainsKey(tcb.marker.markerId))
             {
                 tcb.result = tcb.marker.trackedMarkerData.posInWorld;
+
             }
             else
             {
