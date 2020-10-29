@@ -249,6 +249,9 @@ public class MarkerTracking : MonoBehaviour
                         marker.trackedMarkerData.rotInWorld = localRotation;
                         marker.trackedMarkerData.found = true;
                     }
+                } else
+                {
+                    Debug.LogError("Found not Markers!");
                 }
             }
         }

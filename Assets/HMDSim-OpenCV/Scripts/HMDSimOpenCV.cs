@@ -85,7 +85,10 @@ public class HMDSimOpenCV : MonoBehaviour
     public delegate double _Aruco_CalibrateCameraCharuco_Type(int detectorHandle);
 
     public delegate int _Aruco_GetCalibrateResult_Type(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
-    
+
+    public delegate bool _Aruco_SetCameraIntrinsics_Type(int dectorHandle, float[] cameraMatrix, float[] distCoeffs, int distCoeffsLength);
+
+
     public delegate float _SPAAM_Solve_Type(float[] alignments, int alignmentCount, float[] resultMatrix, bool affine, bool is3Dto2D, bool getError);
 
     public static _RegisterDebugCallback_Type RegisterDebugCallback;
@@ -97,6 +100,7 @@ public class HMDSimOpenCV : MonoBehaviour
     public static _Aruco_CollectCharucoCorners_Type Aruco_CollectCharucoCorners;
     public static _Aruco_CalibrateCameraCharuco_Type Aruco_CalibrateCameraCharuco;
     public static _Aruco_GetCalibrateResult_Type Aruco_GetCalibrateResult;
+    public static _Aruco_SetCameraIntrinsics_Type Aruco_SetCameraIntrinsics;
     public static _SPAAM_Solve_Type SPAAM_Solve;
 
 #else
@@ -134,6 +138,9 @@ public class HMDSimOpenCV : MonoBehaviour
     public static extern int Aruco_GetCalibrateResult(int detectorHandle, float[] cameraMatrix, float[] distCoeffs);
 
     [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
+    public static extern bool Aruco_SetCameraIntrinsics(int detectorHandle, float[] cameraMatrix, float[] distCoeffs, int distCoeffsLength);
+
+    [DllImport(NATIVE_LIBRARY_NAME, CallingConvention = CallingConvention.StdCall)]
     public static extern float SPAAM_Solve(float[] alignments, int alignmentCount, float[] resultMatrix, bool affine, bool is3Dto2D, bool getError);
 
 #endif
@@ -150,8 +157,6 @@ public class HMDSimOpenCV : MonoBehaviour
 #if UNITY_EDITOR
 
         Debug.Log(String.Format("[HMDSimOpenCV] Dynamically loading OpenCV extension.... Expecting to find DLLs at {0}", Application.dataPath + LIB_PATH));
-
-        // Open native library
         libraryHandle = NativeLibraryManager.OpenLibrary(Application.dataPath + LIB_PATH);
         RegisterDebugCallback = NativeLibraryManager.GetDelegate<_RegisterDebugCallback_Type>(
             libraryHandle,
@@ -180,12 +185,17 @@ public class HMDSimOpenCV : MonoBehaviour
         Aruco_GetCalibrateResult = NativeLibraryManager.GetDelegate<_Aruco_GetCalibrateResult_Type>(
             libraryHandle,
             "Aruco_GetCalibrateResult");
+
+        Aruco_SetCameraIntrinsics = NativeLibraryManager.GetDelegate<_Aruco_SetCameraIntrinsics_Type>(
+            libraryHandle,
+            "Aruco_SetCameraIntrinsics");
+
         SPAAM_Solve = NativeLibraryManager.GetDelegate<_SPAAM_Solve_Type>(
             libraryHandle,
             "SPAAM_Solve"); 
-        RegisterDebugCallback(new DebugCallback(DebugLog));
+        //RegisterDebugCallback(new DebugCallback(DebugLog));
 #endif
-
+        RegisterDebugCallback(new DebugCallback(DebugLog));
         _instance = this;
         DontDestroyOnLoad(this.gameObject);
     }
