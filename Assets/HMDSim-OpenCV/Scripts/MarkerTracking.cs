@@ -6,6 +6,10 @@ using Object = System.Object;
 
 public class MarkerTracking : MonoBehaviour
 {
+    [Header("Performance")]
+    [Tooltip("Runs marker detection in a separate thread to prevent FPS drops - might cause latency")]
+    public bool MultiThreaded = false;
+
     [Header("Camera calibration")]
     [Tooltip("CharucoCameraCalibration helper class that holds the calibration for the camera used by Marker Tracking")]
     public CharucoCameraCalibration cameraCalibrationHelper;
@@ -265,6 +269,14 @@ public class MarkerTracking : MonoBehaviour
                 
             }
         }
+    }
+
+    /// <summary>
+    /// Decodes Aruco markers based on frames queued up by Unity
+    /// </summary>
+    public void ThreadedArucoMarkerDecoder()
+    {
+
     }
 
     /// <summary>
