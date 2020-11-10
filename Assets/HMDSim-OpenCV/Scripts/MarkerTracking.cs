@@ -177,7 +177,7 @@ public class MarkerTracking : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (!cameraCalibrationHelper.calibrated)
+        if (!cameraCalibrationHelper || !cameraCalibrationHelper.calibrated)
         {
             return;
         }

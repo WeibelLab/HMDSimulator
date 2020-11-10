@@ -69,7 +69,8 @@ public class NativeLibraryManager
 	{
         Debug.Log("[NativeLibraryManager] Unloading... ");
 		bool flag = FreeLibrary(libraryHandle);
-        Debug.Log(flag + ":" + Marshal.GetLastWin32Error() + ":" + NativeLibraryManager.GetLastError());
+		if (!flag)
+			Debug.LogError(String.Format("[NativeLibraryManager] Could not unload library: {0}",Marshal.GetLastWin32Error()));
         return flag;
     }
 
