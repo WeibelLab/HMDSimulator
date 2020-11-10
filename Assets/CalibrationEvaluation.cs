@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CalibrationEvaluation : SPAAMSolver
@@ -158,20 +159,20 @@ public class CalibrationEvaluation : SPAAMSolver
                     targetPosition = newTargetPosition
                 };
 
-                Debug.Log("====================");
-                Debug.Log("manualObject:" + manualAlignment.objectPosition.ToString("G4"));
-                Debug.Log("groundTruthObject:" + groundTruthAlignment.objectPosition.ToString("G4"));
-                Debug.Log("target:" + groundTruthAlignment.targetPosition.ToString("G4"));
-                Debug.Log("=====");
+                Debug.Log("[CalibrationEvaluation] ====================");
+                Debug.Log("[CalibrationEvaluation] manualObject:" + manualAlignment.objectPosition.ToString("G4"));
+                Debug.Log("[CalibrationEvaluation] groundTruthObject:" + groundTruthAlignment.objectPosition.ToString("G4"));
+                Debug.Log("[CalibrationEvaluation] target:" + groundTruthAlignment.targetPosition.ToString("G4"));
+                Debug.Log("[CalibrationEvaluation] =====");
                 manualAlignment.objectPosition = cameraTracker.InverseTransformPoint(manualAlignment.objectPosition);
                 groundTruthAlignment.objectPosition =
                     cameraTracker.InverseTransformPoint(groundTruthAlignment.objectPosition);
 
                 manualAlignmentsBoth[i].Add(manualAlignment);
                 groundTruthAlignmentsBoth[i].Add(groundTruthAlignment);
-                Debug.Log("manualObject:" + manualAlignment.objectPosition.ToString("G4"));
-                Debug.Log("groundTruthObject:" + groundTruthAlignment.objectPosition.ToString("G4"));
-                Debug.Log("target:" + groundTruthAlignment.targetPosition.ToString("G4"));
+                Debug.Log("[CalibrationEvaluation] manualObject:" + manualAlignment.objectPosition.ToString("G4"));
+                Debug.Log("[CalibrationEvaluation] groundTruthObject:" + groundTruthAlignment.objectPosition.ToString("G4"));
+                Debug.Log("[CalibrationEvaluation] target:" + groundTruthAlignment.targetPosition.ToString("G4"));
             }
         }
 
@@ -181,6 +182,9 @@ public class CalibrationEvaluation : SPAAMSolver
     void ResetPattern()
     {
         expResult = new ExperimentResult();
+        expResult.calibrationModality = (int) pattern;
+        expResult.calibrationModalityStr = pattern.ToString();
+
         lastIndices[0] = -1;
         lastIndices[1] = -1;
         solved = false;
@@ -204,6 +208,7 @@ public class CalibrationEvaluation : SPAAMSolver
         {
             // Switch condition
             pattern = (Pattern)((int)(pattern + 1) % (int)Pattern.Pattern_count);
+            
             if (pattern == Pattern.Depth_SPAAM)
             {
                 sp.lockPosition = true;
@@ -291,6 +296,8 @@ public class CalibrationEvaluation : SPAAMSolver
         manualEquationBoth[0] = SolveAlignment(manualAlignmentsBoth[0], true, false);
         manualEquationBoth[1] = SolveAlignment(manualAlignmentsBoth[1], true, false);
 
+        expResult.pointsCollected = manualAlignmentsBoth[0].Count;
+
         expResult.groundTruthProjectionMatrixLeft = groundTruthEquationBoth[0];
         expResult.groundTruthProjectionMatrixRight = groundTruthEquationBoth[1];
         expResult.projectionMatrixLeft = manualEquationBoth[0];
@@ -330,7 +337,7 @@ public class CalibrationEvaluation : SPAAMSolver
 
         // Call opencv function
         float error = HMDSimOpenCV.SPAAM_Solve(input, alignmentCount, resultMatrix, affine, true, true);
-        Debug.Log("Reprojection error: " + error);
+        Debug.Log("[CalibrationEvaluation] Reprojection error: " + error);
 
         // Construct matrix
         Matrix4x4 result = Matrix4x4.zero;
@@ -349,9 +356,9 @@ public class CalibrationEvaluation : SPAAMSolver
             resultOffset.w = resultMatrix[17];
 
 
-            Debug.Log("Condition number is: " + conditionNumber);
-            Debug.Log("Offset is: " + resultOffset);
-            Debug.Log("Result Matrix is: " + result);
+            Debug.Log("[CalibrationEvaluation] Condition number is: " + conditionNumber);
+            Debug.Log("[CalibrationEvaluation] Offset is: " + resultOffset);
+            Debug.Log("[CalibrationEvaluation] Result Matrix is: " + result);
 
 
         }
@@ -363,9 +370,9 @@ public class CalibrationEvaluation : SPAAMSolver
             resultOffsetGT.z = resultMatrix[16];
             resultOffsetGT.w = resultMatrix[17];
 
-            Debug.Log("Condition number is: " + conditionNumberGT);
-            Debug.Log("Offset is: " + resultOffsetGT);
-            Debug.Log("Result Matrix is: " + result);
+            Debug.Log("[CalibrationEvaluation] Condition number is: " + conditionNumberGT);
+            Debug.Log("[CalibrationEvaluation] Offset is: " + resultOffsetGT);
+            Debug.Log("[CalibrationEvaluation] Result Matrix is: " + result);
         }
 
 
