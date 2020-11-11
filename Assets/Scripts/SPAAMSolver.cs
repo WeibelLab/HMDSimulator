@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// Class that holds matching points in two coordinate systems
+/// </summary>
 [Serializable]
-public class Alignment
+public class MatchingPoints
 {
     [SerializeField] public Vector3 objectPosition;
     [SerializeField] public Vector3 targetPosition;
@@ -18,20 +21,20 @@ public class SPAAMSolver : MonoBehaviour
     public Matrix4x4 manualEquation;
     public bool solved = false;
 
-    public List<Alignment> groundTruthAlignments = new List<Alignment>();
-    public List<Alignment> manualAlignments = new List<Alignment>();
+    public List<MatchingPoints> groundTruthAlignments = new List<MatchingPoints>();
+    public List<MatchingPoints> manualAlignments = new List<MatchingPoints>();
 
     protected SPAAMTargetManager manager;
 
     public virtual void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
     {
-        Alignment manualAlignment = new Alignment
+        MatchingPoints manualAlignment = new MatchingPoints
         {
             objectPosition = objectPosition,
             targetPosition = targetPosition
         };
 
-        Alignment groundTruthAlignment = new Alignment
+        MatchingPoints groundTruthAlignment = new MatchingPoints
         {
             objectPosition = TrackerBase.InverseTransformPoint(targetPosition),
             targetPosition = targetPosition
@@ -48,13 +51,13 @@ public class SPAAMSolver : MonoBehaviour
         //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
         groundTruthEquation = SolveAlignment(groundTruthAlignments, true);
         manualEquation = SolveAlignment(manualAlignments, true);
-        Debug.Log("LocalToWorld:" + TrackerBase.localToWorldMatrix);
+        Debug.Log("[SPAAMSolver] LocalToWorld:" + TrackerBase.localToWorldMatrix);
         groundTruthAlignments.Clear();
         manualAlignments.Clear();
         solved = true;
     }
 
-    protected virtual Matrix4x4 SolveAlignment(List<Alignment> alignments, bool affine = true)
+    protected virtual Matrix4x4 SolveAlignment(List<MatchingPoints> alignments, bool affine = true)
     {
         // input parameters
         int alignmentCount = alignments.Count;
@@ -65,7 +68,7 @@ public class SPAAMSolver : MonoBehaviour
         for (int i = 0; i < alignmentCount; i++)
         {
             int pairStep = 6 * i;
-            Alignment curr = alignments[i];
+            MatchingPoints curr = alignments[i];
             input[pairStep] = curr.objectPosition.x;
             input[pairStep + 1] = curr.objectPosition.y;
             input[pairStep + 2] = curr.objectPosition.z;

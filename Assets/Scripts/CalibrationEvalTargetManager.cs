@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// CalibrationEvalTargetManager manages the AR side of the calibration
+/// 
+/// (Given that the VR side needs to access it to communicate what changes it should apply
+/// to the headset, this object is a singleton (see SPAAMTargetManager implementation) )
+/// </summary>
 public class CalibrationEvalTargetManager : SPAAMTargetManager
 {
     public Vector2 dist;
@@ -26,7 +32,7 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
     public int[] indices = new int[2];
     public Vector3[] targetPositionsOutput = new Vector3[2];
     public Transform[] eyeEst = new Transform[2];
-    private CalibrationEvaluation.Pattern pattern;
+    private CalibrationEvaluation.CalibrationApproach pattern;
 
     public float testVal = 0;
 
@@ -44,13 +50,13 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
 
     protected override void DisplayCurrentTarget()
     {
-        if (pattern == CalibrationEvaluation.Pattern.SPAAM || pattern == CalibrationEvaluation.Pattern.Depth_SPAAM)
+        if (pattern == CalibrationEvaluation.CalibrationApproach.SPAAM || pattern == CalibrationEvaluation.CalibrationApproach.Depth_SPAAM)
         {
             dots[side][lastIndex[side]].color = new Color(1, 0, 0, 1);
             dots[side][indices[side]].color = new Color(1, 1, 0, 1);
             dots[other][lastIndex[other]].color = new Color(1, 0, 0, 1);
         }
-        else if(pattern == CalibrationEvaluation.Pattern.Stereo_SPAAM || pattern == CalibrationEvaluation.Pattern.Stylus_mark)
+        else if(pattern == CalibrationEvaluation.CalibrationApproach.Stereo_SPAAM || pattern == CalibrationEvaluation.CalibrationApproach.Stylus_mark)
         {
             //dots[0][lastIndex[side]].color = new Color(1, 0, 0, 1);
             //dots[0][indices[side]].color = new Color(1, 1, 0, 1);
@@ -63,7 +69,7 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
     public override Vector3 PerformAlignment()
     {
         Vector2 target = targetPositions2D[indices[side]];
-        if (pattern == CalibrationEvaluation.Pattern.SPAAM || pattern == CalibrationEvaluation.Pattern.Depth_SPAAM)
+        if (pattern == CalibrationEvaluation.CalibrationApproach.SPAAM || pattern == CalibrationEvaluation.CalibrationApproach.Depth_SPAAM)
         {
             lastIndex[side] = indices[side];
             indices[side] = (indices[side] + 1) % dots[side].Count;
@@ -87,27 +93,35 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
         return target;
     }
 
-    public void ConditionChange(CalibrationEvaluation.Pattern p)
+    public void ConditionChange(CalibrationEvaluation.CalibrationApproach p)
     {
+
+        Debug.Log("[CalibrationEvalTargetManager] - Starting evaluation with pattern " + p.ToString());
         switch (p)
         {
-            case CalibrationEvaluation.Pattern.SPAAM:
+            case CalibrationEvaluation.CalibrationApproach.None:
+                targetCrosshair.gameObject.SetActive(false);
+                SwitchTargetPosition(false);
+                break;
+
+
+            case CalibrationEvaluation.CalibrationApproach.SPAAM:
 
                 targetCrosshair.gameObject.SetActive(false);
                 SwitchTargetPosition(false);
                 break;
-            case CalibrationEvaluation.Pattern.Depth_SPAAM:
+            case CalibrationEvaluation.CalibrationApproach.Depth_SPAAM:
 
                 targetCrosshair.gameObject.SetActive(false);
                 SwitchTargetPosition(true);
                 break;
-            case CalibrationEvaluation.Pattern.Stereo_SPAAM:
+            case CalibrationEvaluation.CalibrationApproach.Stereo_SPAAM:
                 //calibrationArea.GetComponent<TrackedObject>().enabled = false;
 
                 targetCrosshair.gameObject.SetActive(true);
                 SwitchTargetPosition(true, true);
                 break;
-            case CalibrationEvaluation.Pattern.Stylus_mark:
+            case CalibrationEvaluation.CalibrationApproach.Stylus_mark:
 
                 targetCrosshair.gameObject.SetActive(true);
                 //calibrationArea.GetComponent<TrackedObject>().enabled = true;
@@ -116,6 +130,8 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
         }
 
         pattern = p;
+        
+
         InitializePosition();
     }
 
@@ -220,10 +236,6 @@ public class CalibrationEvalTargetManager : SPAAMTargetManager
 
     }
 
-    void FixedUpdate()
-    {
-        
-    }
     protected override void update()
     {
         

@@ -46,7 +46,7 @@ public class SPAAM2DSolver : SPAAMSolver
     // Start is called before the first frame update
     public override void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
     {
-        Alignment manualAlignment = new Alignment
+        MatchingPoints manualAlignment = new MatchingPoints
         {
             objectPosition = objectPosition,
             targetPosition = targetPosition
@@ -64,7 +64,7 @@ public class SPAAM2DSolver : SPAAMSolver
         float dist = diff.magnitude;
         
 
-        Alignment groundTruthAlignment = new Alignment
+        MatchingPoints groundTruthAlignment = new MatchingPoints
         {
             objectPosition = Camera.main.transform.TransformPoint(offsetVector3) + direction * dist,
             targetPosition = targetPosition
@@ -132,7 +132,7 @@ public class SPAAM2DSolver : SPAAMSolver
         solved = true;
     }
 
-    protected Matrix4x4 SolveAlignment(List<Alignment> alignments, bool affine = true, bool groundTruth = false)
+    protected Matrix4x4 SolveAlignment(List<MatchingPoints> alignments, bool affine = true, bool groundTruth = false)
     {
         // input parameters
         int alignmentCount = alignments.Count;
@@ -143,7 +143,7 @@ public class SPAAM2DSolver : SPAAMSolver
         for (int i = 0; i < alignmentCount; i++)
         {
             int pairStep = 5 * i;
-            Alignment curr = alignments[i];
+            MatchingPoints curr = alignments[i];
             input[pairStep] = curr.objectPosition.x;
             input[pairStep + 1] = curr.objectPosition.y;
             input[pairStep + 2] = curr.objectPosition.z;

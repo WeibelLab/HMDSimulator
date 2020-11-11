@@ -22,6 +22,11 @@ public class HandAction : MonoBehaviour
 
     public GrabbableObject objectInHand = null;
 
+    /// <summary>
+    /// spaamTargetManager is a singleton set during runtime in the AR scene (so there is no direct way of linking it
+    /// in the VR scene)
+    /// </summary>
+    [HideInInspector]
     public SPAAMTargetManager spaamTargetManager;
 
     public SPAAMSolver spaamSolver;

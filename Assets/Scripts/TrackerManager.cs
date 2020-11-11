@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
+/// <summary>
+/// All trackers go thorough this class
+/// </summary>
 public class TrackerManager : MonoBehaviour
 {
     private Dictionary<string, TrackerBehavior> trackers = new Dictionary<string, TrackerBehavior>();
