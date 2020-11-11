@@ -11,7 +11,8 @@ using UnityEngine;
 [Serializable]
 public class ExperimentResult
 {
-    [SerializeField] public float completionTime = 0.0f;
+
+    [SerializeField] public double completionTime = 0.0f; // completion time in seconds
     [SerializeField] public DateTime startTime = new DateTime();
     [SerializeField] public DateTime endTime;
      

@@ -28,15 +28,20 @@ public class CalibrationEvaluation : SPAAMSolver
     public StartingPostion sp;
 
     public CalibrationApproach pattern;
+
     public float minDist = 1.28f;
+
     public float step = 0.1f;
+
     public float currentDist = 2.0f;
+
     public Transform position;
 
     public Vector4 resultOffsetGT;
     public float conditionNumberGT;
     public Vector4 resultOffset;
     public float conditionNumber;
+
 
     public List<int> magicDistLookupList = new List<int>();
 
@@ -51,6 +56,38 @@ public class CalibrationEvaluation : SPAAMSolver
     private Vector3 debug1;
     private Vector3 debug2;
 
+    
+    protected CalibrationEvalTargetManager ceManager;
+
+    [HideInInspector]
+    public int side = 0;
+
+    // Below we have elements that can help us run a smooth user study
+
+    [Header("Audio feedback")]
+    public AudioClip pointCollectedSound;
+    public AudioClip calibrationDoneSound;
+    public AudioClip newCalibrationApproachSound;
+    public AudioSource audioPlayer;
+
+    [Header("Voice feedback")]
+    public AudioClip voiceOverLeftEye;
+    public AudioClip voiceOverRightEye;
+    public AudioClip voiceOverResultsSaved;
+    public AudioClip voiceOverCalibrated;
+    public AudioClip voiceOverCollectMorePoints;
+    public AudioSource audioPlayerForVoiceOver;
+
+
+    // Below elements that help us explain to the user what they have to do for each stage
+    [Header("Visual feedback")]
+    public Transform WaitForInstructions;
+    public Transform DepthSPAAMInstructions;
+    public Transform StereoSPAAMInstructions;
+    public Transform StylusMarkInstructions;
+
+
+    [Header("Calibration data structures")]
     public ExperimentResult expResult;
 
     public Matrix4x4[] groundTruthEquationBoth = new Matrix4x4[2];
@@ -58,23 +95,7 @@ public class CalibrationEvaluation : SPAAMSolver
 
     public List<MatchingPoints>[] groundTruthAlignmentsBoth = new List<MatchingPoints>[2];
     public List<MatchingPoints>[] manualAlignmentsBoth = new List<MatchingPoints>[2];
-
-    protected CalibrationEvalTargetManager ceManager;
-
-    public int side = 0;
-
-    // Below we have elements that can help us run a smooth user study
-
-    public AudioClip pointCollectedSound;
-    public AudioClip calibrationDoneSound;
-    public AudioClip newCalibrationApproach;
-    public AudioSource audioPlayer;
-
-    // Below elements that help us explain to the user what they have to do for each stage
-    public Transform WaitForInstructions;
-    public Transform DepthSPAAMInstructions;
-    public Transform StereoSPAAMInstructions;
-    public Transform StylusMarkInstructions;
+    private bool firstPoint = true;
 
     void Start()
     {
@@ -94,6 +115,12 @@ public class CalibrationEvaluation : SPAAMSolver
     /// <param name="targetPosition"></param>
     public override void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
     {
+
+        if (firstPoint)
+        {
+            expResult.startTime = System.DateTime.Now;
+            firstPoint = false;
+        }
 
         if (pattern == CalibrationApproach.SPAAM || pattern == CalibrationApproach.Depth_SPAAM)
         {
@@ -130,7 +157,13 @@ public class CalibrationEvaluation : SPAAMSolver
             manualAlignmentsBoth[side].Add(manualAlignment);
             groundTruthAlignmentsBoth[side].Add(groundTruthAlignment);
 
+            // basically left or right eye
             side = side == 0 ? 1 : 0;
+
+            // todo: change this to do 9 points per eye first?
+            audioPlayerForVoiceOver.clip = (side == 0)? voiceOverLeftEye : voiceOverRightEye;
+            audioPlayerForVoiceOver.Play();
+
         }
         else
         {
@@ -203,7 +236,11 @@ public class CalibrationEvaluation : SPAAMSolver
             }
         }
 
+        // save last data point for the time to task measurement
+        expResult.endTime = System.DateTime.Now;
+        expResult.completionTime = (expResult.endTime - expResult.startTime).TotalSeconds;
 
+        // play sound
         audioPlayer.clip = pointCollectedSound;
         audioPlayer.Play();
 
@@ -214,6 +251,7 @@ public class CalibrationEvaluation : SPAAMSolver
     {
         // each time we reset the pattern, we play a tune to let the user know
 
+        firstPoint = true;
         expResult = new ExperimentResult();
         expResult.calibrationModality = (int) pattern;
         expResult.calibrationModalityStr = pattern.ToString();
@@ -221,7 +259,7 @@ public class CalibrationEvaluation : SPAAMSolver
         lastIndices[0] = -1;
         lastIndices[1] = -1;
         solved = false;
-        side = 0;
+        side = 0; // reset what eye will be used for SPAAM
 
         // communicates with the AR side to change what the user sees
         ceManager.ConditionChange(pattern);
@@ -236,6 +274,8 @@ public class CalibrationEvaluation : SPAAMSolver
         {
             case CalibrationApproach.Depth_SPAAM:
                 changeVisibility(DepthSPAAMInstructions, true);
+                audioPlayerForVoiceOver.clip = (side == 0) ? voiceOverLeftEye : voiceOverRightEye;
+                audioPlayerForVoiceOver.Play();
                 break;
             case CalibrationApproach.Stereo_SPAAM:
                 changeVisibility(StereoSPAAMInstructions, true);
@@ -250,16 +290,30 @@ public class CalibrationEvaluation : SPAAMSolver
 
         if (pattern != CalibrationApproach.None)
         { 
-            audioPlayer.clip = newCalibrationApproach;
+            audioPlayer.clip = newCalibrationApproachSound;
             audioPlayer.Play();
         }
     }
 
     void changeVisibility(Transform t, bool visible)
     {
+        // show / hide all meshes
         foreach(MeshRenderer me in t.GetComponentsInChildren<MeshRenderer>())
         {
             me.enabled = visible;
+        }
+
+        // play / stop playing all instructions
+        foreach(AudioSource a in t.GetComponentsInChildren<AudioSource>())
+        {
+            if (visible)
+            {
+                a.Play();
+            } else
+            {
+                if (a.isPlaying)
+                    a.Stop();
+            }
         }
     }
 
@@ -305,8 +359,8 @@ public class CalibrationEvaluation : SPAAMSolver
             ResetPattern();
         }
 
-        // calibration 3
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // calibrates if the user presses enter
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             if (!ceManager.initialized)
             {
@@ -320,7 +374,7 @@ public class CalibrationEvaluation : SPAAMSolver
 
 
 
-
+        /*
         if (Input.GetKeyDown(KeyCode.M))
         {
             // Switch condition
@@ -337,18 +391,27 @@ public class CalibrationEvaluation : SPAAMSolver
 
             ResetPattern();
         }
-
+        
         if (Input.GetKeyDown(KeyCode.C))
         {
             // Reset condition
             ResetPattern();
         }
 
-        if (Input.GetKeyDown(KeyCode.S))
+        */
+
+        
+        //
+        // Saves results if the user presses Space
+        //
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             // TODO: Store expResult
-            string time = System.DateTime.UtcNow.ToString("HH_mm_dd_MMMM_yyyy");
-            ExperimentResult.SaveToDrive(expResult, "result_"+ time +".json");
+            string time = System.DateTime.UtcNow.ToString("HH_mm_ss_dd_MMMM_yyyy");
+            ExperimentResult.SaveToDrive(expResult, "result_"+pattern.ToString()+"_"+ time +".json");
+
+            audioPlayerForVoiceOver.clip = voiceOverResultsSaved;
+            audioPlayerForVoiceOver.Play();
         }
 
         if (!ceManager)
@@ -404,10 +467,17 @@ public class CalibrationEvaluation : SPAAMSolver
 
     public override void Solve()
     {
-        // TODO: Send info to opencv and solve the linear equation
-        //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
-        //Debug.Log("Ground Truth");
-        groundTruthEquationBoth[0] = SolveAlignment(groundTruthAlignmentsBoth[0], true, true);
+        if (manualAlignmentsBoth[0].Count < 9)
+        {
+            audioPlayerForVoiceOver.clip = voiceOverCollectMorePoints;
+            audioPlayerForVoiceOver.Play();
+            return;
+        }
+
+    // TODO: Send info to opencv and solve the linear equation
+    //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
+    //Debug.Log("Ground Truth");
+    groundTruthEquationBoth[0] = SolveAlignment(groundTruthAlignmentsBoth[0], true, true);
         groundTruthEquationBoth[1] = SolveAlignment(groundTruthAlignmentsBoth[1], true, true);
         //Debug.Log("Manual");
         manualEquationBoth[0] = SolveAlignment(manualAlignmentsBoth[0], true, false);
@@ -430,6 +500,9 @@ public class CalibrationEvaluation : SPAAMSolver
 
         audioPlayer.clip = calibrationDoneSound;
         audioPlayer.Play();
+
+        audioPlayerForVoiceOver.clip = voiceOverCalibrated;
+        audioPlayerForVoiceOver.Play();
 
     }
 
