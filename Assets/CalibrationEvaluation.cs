@@ -344,11 +344,11 @@ public class CalibrationEvaluation : SPAAMSolver
             ResetPattern();
         }
 
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.S))
         {
             // TODO: Store expResult
             string time = System.DateTime.UtcNow.ToString("HH_mm_dd_MMMM_yyyy");
-            ExperimentResult.SaveToDrive(expResult, "D://test//result_"+ time +".json");
+            ExperimentResult.SaveToDrive(expResult, "result_"+ time +".json");
         }
 
         if (!ceManager)

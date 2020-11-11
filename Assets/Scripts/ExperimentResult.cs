@@ -50,7 +50,10 @@ public class ExperimentResult
     public static void SaveToDrive(ExperimentResult input, string path)
     {
         string jsonString = ConvertToJSON(input);
+        Debug.Log("============= saving results (begin) ===================");
+        Debug.Log(path);
         Debug.Log(jsonString);
-        //File.WriteAllText(path, jsonString);
+        Debug.Log("============= saving results (end) ===================");
+        File.WriteAllText(path, jsonString);
     }
 }
