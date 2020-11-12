@@ -10,7 +10,7 @@ using Valve.VR;
 /// </summary>
 public class CalibrationEvaluation : SPAAMSolver
 {
-    public enum CalibrationApproach
+    public enum ProjectionCalibrationApproach
     {
         None,
         SPAAM,
@@ -20,17 +20,19 @@ public class CalibrationEvaluation : SPAAMSolver
         Pattern_count
     }
 
-    public Transform targetObject;
 
     /// <summary>
     /// We shall send the user back to the starting position every time a new calibration study starts
     /// </summary>
+    /// 
+    [Header("Projection specifics")]
     public StartingPostion sp;
 
-    public CalibrationApproach pattern;
+    public ProjectionCalibrationApproach projectionPattern;
 
     public float minDist = 1.28f;
 
+    //
     public float step = 0.1f;
 
     public float currentDist = 2.0f;
@@ -62,40 +64,20 @@ public class CalibrationEvaluation : SPAAMSolver
     [HideInInspector]
     public int side = 0;
 
-    // Below we have elements that can help us run a smooth user study
 
-    [Header("Audio feedback")]
-    public AudioClip pointCollectedSound;
-    public AudioClip calibrationDoneSound;
-    public AudioClip newCalibrationApproachSound;
-    public AudioSource audioPlayer;
-
-    [Header("Voice feedback")]
+    [Header("Voice feedback (Projection)")]
     public AudioClip voiceOverLeftEye;
     public AudioClip voiceOverRightEye;
-    public AudioClip voiceOverResultsSaved;
-    public AudioClip voiceOverCalibrated;
-    public AudioClip voiceOverCollectMorePoints;
-    public AudioSource audioPlayerForVoiceOver;
+    
 
 
-    // Below elements that help us explain to the user what they have to do for each stage
-    [Header("Visual feedback")]
-    public Transform WaitForInstructions;
-    public Transform DepthSPAAMInstructions;
-    public Transform StereoSPAAMInstructions;
-    public Transform StylusMarkInstructions;
-
-
-    [Header("Calibration data structures")]
-    public ExperimentResult expResult;
-
+    [Header("Calibration data structures (Projection)")]
     public Matrix4x4[] groundTruthEquationBoth = new Matrix4x4[2];
     public Matrix4x4[] manualEquationBoth = new Matrix4x4[2];
 
     public List<MatchingPoints>[] groundTruthAlignmentsBoth = new List<MatchingPoints>[2];
     public List<MatchingPoints>[] manualAlignmentsBoth = new List<MatchingPoints>[2];
-    private bool firstPoint = true;
+    
 
     void Start()
     {
@@ -122,7 +104,7 @@ public class CalibrationEvaluation : SPAAMSolver
             firstPoint = false;
         }
 
-        if (pattern == CalibrationApproach.SPAAM || pattern == CalibrationApproach.Depth_SPAAM)
+        if (projectionPattern == ProjectionCalibrationApproach.SPAAM || projectionPattern == ProjectionCalibrationApproach.Depth_SPAAM)
         {
             MatchingPoints manualAlignment = new MatchingPoints
             {
@@ -160,9 +142,12 @@ public class CalibrationEvaluation : SPAAMSolver
             // basically left or right eye
             side = side == 0 ? 1 : 0;
 
-            // todo: change this to do 9 points per eye first?
-            audioPlayerForVoiceOver.clip = (side == 0)? voiceOverLeftEye : voiceOverRightEye;
-            audioPlayerForVoiceOver.Play();
+            if (playVoiceFeedback)
+            { 
+                // todo: change this to do 9 points per eye first?
+                audioPlayerForVoiceOver.clip = (side == 0)? voiceOverLeftEye : voiceOverRightEye;
+                audioPlayerForVoiceOver.Play();
+            }
 
         }
         else
@@ -170,7 +155,7 @@ public class CalibrationEvaluation : SPAAMSolver
             for (int i = 0; i < 2; i++)
             {
                 Vector3 newTargetPosition = targetPosition;
-                if (pattern == CalibrationApproach.Stereo_SPAAM)
+                if (projectionPattern == ProjectionCalibrationApproach.Stereo_SPAAM)
                 {
                     //targetPosition = ceManager.targetPositionsOutput[i];
                 }
@@ -241,121 +226,104 @@ public class CalibrationEvaluation : SPAAMSolver
         expResult.completionTime = (expResult.endTime - expResult.startTime).TotalSeconds;
 
         // play sound
-        audioPlayer.clip = pointCollectedSound;
-        audioPlayer.Play();
+        if (playAudio)
+        { 
+            audioPlayer.clip = pointCollectedSound;
+            audioPlayer.Play();
+        }
 
         //Debug.Log(groundTruthAlignment.objectPosition);
     }
 
-    void ResetPattern()
+    public override void ResetPattern()
     {
-        // each time we reset the pattern, we play a tune to let the user know
-
+        // each time we reset the projectionPattern, we play a tune to let the user know
         firstPoint = true;
         expResult = new ExperimentResult();
-        expResult.calibrationModality = (int) pattern;
-        expResult.calibrationModalityStr = pattern.ToString();
+        expResult.calibrationType = "projection";
+        expResult.calibrationModality = (int) projectionPattern;
+        expResult.calibrationModalityStr = projectionPattern.ToString();
 
         lastIndices[0] = -1;
         lastIndices[1] = -1;
         solved = false;
         side = 0; // reset what eye will be used for SPAAM
 
+        // fixes the stick 
+        targetObject.localPosition = targetObjectStartPosition;
+        targetObject.localRotation = targetObjectStartRotation;
+
+
         // communicates with the AR side to change what the user sees
-        ceManager.ConditionChange(pattern);
+        ceManager.ConditionChange(projectionPattern);
 
         // applies changes the the local environment
-        changeVisibility(DepthSPAAMInstructions, false);
-        changeVisibility(StereoSPAAMInstructions, false);
-        changeVisibility(StylusMarkInstructions, false);
-        changeVisibility(WaitForInstructions, false);
+        updateModalityInstructions((int)projectionPattern);
 
-        switch (pattern)
+        // does specific things per modality
+        switch (projectionPattern)
         {
-            case CalibrationApproach.Depth_SPAAM:
-                changeVisibility(DepthSPAAMInstructions, true);
+
+            case ProjectionCalibrationApproach.SPAAM:
+                sp.lockPosition = true;
+                break;
+            case ProjectionCalibrationApproach.Depth_SPAAM:
                 audioPlayerForVoiceOver.clip = (side == 0) ? voiceOverLeftEye : voiceOverRightEye;
                 audioPlayerForVoiceOver.Play();
-                break;
-            case CalibrationApproach.Stereo_SPAAM:
-                changeVisibility(StereoSPAAMInstructions, true);
-                break;
-            case CalibrationApproach.Stylus_mark:
-                changeVisibility(StylusMarkInstructions, true);
+                sp.lockPosition = true;
                 break;
             default:
-                changeVisibility(WaitForInstructions, true);
+                sp.lockPosition = false;
                 break;
         }
 
-        if (pattern != CalibrationApproach.None)
+        // plays audio
+        if (playAudio)
         { 
-            audioPlayer.clip = newCalibrationApproachSound;
-            audioPlayer.Play();
-        }
-    }
-
-    void changeVisibility(Transform t, bool visible)
-    {
-        // show / hide all meshes
-        foreach(MeshRenderer me in t.GetComponentsInChildren<MeshRenderer>())
-        {
-            me.enabled = visible;
-        }
-
-        // play / stop playing all instructions
-        foreach(AudioSource a in t.GetComponentsInChildren<AudioSource>())
-        {
-            if (visible)
-            {
-                a.Play();
-            } else
-            {
-                if (a.isPlaying)
-                    a.Stop();
+            if (projectionPattern != ProjectionCalibrationApproach.None)
+            { 
+                audioPlayer.clip = newCalibrationApproachSound;
+                audioPlayer.Play();
             }
         }
     }
 
     void FixedUpdate()
     {
-        if (pattern == CalibrationApproach.Stereo_SPAAM)
+        if (projectionPattern == ProjectionCalibrationApproach.Stereo_SPAAM)
         {
             calibrationArea.position = cameraTracker.transform.position;
             calibrationArea.rotation = cameraTracker.transform.rotation;
         }
     }
 
-    void Update()
+   public override void update()
     {
         // nothing
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
-            pattern = CalibrationApproach.None;
+            projectionPattern = ProjectionCalibrationApproach.None;
             ResetPattern();
         }
 
         // calibration 1
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            pattern = CalibrationApproach.Depth_SPAAM;
-            sp.lockPosition = true;
+            projectionPattern = ProjectionCalibrationApproach.Depth_SPAAM;
             ResetPattern();
         }
 
         // calibration 2
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            pattern = CalibrationApproach.Stereo_SPAAM;
-            sp.lockPosition = false;
+            projectionPattern = ProjectionCalibrationApproach.Stereo_SPAAM;
             ResetPattern();
         }
 
         // calibration 3
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            pattern = CalibrationApproach.Stylus_mark;
-            sp.lockPosition = false;
+            projectionPattern = ProjectionCalibrationApproach.Stylus_mark;
             ResetPattern();
         }
 
@@ -378,9 +346,9 @@ public class CalibrationEvaluation : SPAAMSolver
         if (Input.GetKeyDown(KeyCode.M))
         {
             // Switch condition
-            pattern = (CalibrationApproach)((int)(pattern + 1) % (int)CalibrationApproach.Pattern_count);
+            projectionPattern = (ProjectionCalibrationApproach)((int)(projectionPattern + 1) % (int)ProjectionCalibrationApproach.Pattern_count);
             
-            if (pattern == CalibrationApproach.Depth_SPAAM)
+            if (projectionPattern == ProjectionCalibrationApproach.Depth_SPAAM)
             {
                 sp.lockPosition = true;
             }
@@ -400,19 +368,31 @@ public class CalibrationEvaluation : SPAAMSolver
 
         */
 
-        
+
         //
-        // Saves results if the user presses Space
+        // Adds point on space
         //
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // TODO: Store expResult
+            Vector3 targetPosition = ceManager.PerformAlignment();
+            Vector3 objectPosition = targetObject.position; //TODO
+            PerformAlignment(objectPosition, targetPosition);
+        }
+
+        //
+        // Saves results if the user presses KeyPadEnter
+        //
+
+        if (Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+
             string time = System.DateTime.UtcNow.ToString("HH_mm_ss_dd_MMMM_yyyy");
-            ExperimentResult.SaveToDrive(expResult, "result_"+pattern.ToString()+"_"+ time +".json");
+            ExperimentResult.SaveToDrive(expResult, "result_" + projectionPattern.ToString() + "_" + time + ".json");
 
             audioPlayerForVoiceOver.clip = voiceOverResultsSaved;
             audioPlayerForVoiceOver.Play();
-        }
+        }    
 
         if (!ceManager)
         {
@@ -431,15 +411,15 @@ public class CalibrationEvaluation : SPAAMSolver
             if (lastIndices[side] != ceManager.indices[side])
             {
                 // Update position
-                switch (pattern)
+                switch (projectionPattern)
                 {
-                    case CalibrationApproach.SPAAM:
+                    case ProjectionCalibrationApproach.SPAAM:
                         break;
-                    case CalibrationApproach.Depth_SPAAM:
+                    case ProjectionCalibrationApproach.Depth_SPAAM:
                         currentDist = minDist + magicDistLookupList[ceManager.indices[side]] * step;
                         break;
-                    case CalibrationApproach.Stereo_SPAAM:
-                    case CalibrationApproach.Stylus_mark:
+                    case ProjectionCalibrationApproach.Stereo_SPAAM:
+                    case ProjectionCalibrationApproach.Stylus_mark:
                         currentDist = minDist - 1.1f + magicDistLookupList[ceManager.indices[side]] * step * 0.5f;
                         break;
                 }
@@ -457,11 +437,11 @@ public class CalibrationEvaluation : SPAAMSolver
     {
         if (index == 0)
         {
-            expResult.errorLeft = error;
+            expResult.projectionErrorLeft = error;
         }
         else
         {
-            expResult.errorRight = error;
+            expResult.projectionErrorRight = error;
         }
     }
 
@@ -485,8 +465,8 @@ public class CalibrationEvaluation : SPAAMSolver
 
         expResult.pointsCollected = manualAlignmentsBoth[0].Count;
 
-        expResult.groundTruthProjectionMatrixLeft = groundTruthEquationBoth[0];
-        expResult.groundTruthProjectionMatrixRight = groundTruthEquationBoth[1];
+        expResult.projectionGroundTruthMatrixLeft = groundTruthEquationBoth[0];
+        expResult.projectionGroundTruthMatrixRight = groundTruthEquationBoth[1];
         expResult.projectionMatrixLeft = manualEquationBoth[0];
         expResult.projectionMatrixRight = manualEquationBoth[1];
 
@@ -498,11 +478,17 @@ public class CalibrationEvaluation : SPAAMSolver
         manualAlignmentsBoth[1].Clear();
         solved = true;
 
-        audioPlayer.clip = calibrationDoneSound;
-        audioPlayer.Play();
+        if (playAudio)
+        { 
+            audioPlayer.clip = calibrationDoneSound;
+            audioPlayer.Play();
+        }
 
-        audioPlayerForVoiceOver.clip = voiceOverCalibrated;
-        audioPlayerForVoiceOver.Play();
+        if (playVoiceFeedback)
+        { 
+            audioPlayerForVoiceOver.clip = voiceOverCalibrated;
+            audioPlayerForVoiceOver.Play();
+        }
 
     }
 

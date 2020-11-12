@@ -5,8 +5,13 @@ using UnityEngine.Animations;
 
 public class GrabbableCube : GrabbableObject
 {
+
+    public bool CanGrab = true;
+
     //private Transform originalParent = null;
     private ParentConstraint constraint;
+
+
 
     // Start is called before the first frame update
     void Start()
@@ -23,15 +28,18 @@ public class GrabbableCube : GrabbableObject
 
     public override void Grab(Transform hand)
     {
-        ConstraintSource cs = new ConstraintSource();
-        cs.sourceTransform = hand;
-        cs.weight = 1;
-        constraint.AddSource(cs);
-        Vector3 positionOffset = hand.InverseTransformPoint(transform.position);
-        Quaternion rotationOffset = Quaternion.Inverse(hand.rotation) * transform.rotation;
-        constraint.SetTranslationOffset(0, positionOffset);
-        constraint.SetRotationOffset(0, rotationOffset.eulerAngles);
-        constraint.constraintActive = true;
+        if (CanGrab)
+        { 
+            ConstraintSource cs = new ConstraintSource();
+            cs.sourceTransform = hand;
+            cs.weight = 1;
+            constraint.AddSource(cs);
+            Vector3 positionOffset = hand.InverseTransformPoint(transform.position);
+            Quaternion rotationOffset = Quaternion.Inverse(hand.rotation) * transform.rotation;
+            constraint.SetTranslationOffset(0, positionOffset);
+            constraint.SetRotationOffset(0, rotationOffset.eulerAngles);
+            constraint.constraintActive = true;
+        } 
     }
 
     public override void Release(Transform hand)

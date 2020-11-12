@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -15,15 +13,23 @@ public class ExperimentResult
     [SerializeField] public double completionTime = 0.0f; // completion time in seconds
     [SerializeField] public DateTime startTime = new DateTime();
     [SerializeField] public DateTime endTime;
-     
+
+    // custom field that can hold any calibration name (projection, 6DoF, etc..)
+    [SerializeField] public string calibrationType = "undefined";
+
+    // Fields used for the projective transformation (display calibration per eye)
     [SerializeField] public Matrix4x4 projectionMatrixLeft;
     [SerializeField] public Matrix4x4 projectionMatrixRight;
-    [SerializeField] public Matrix4x4 groundTruthProjectionMatrixLeft;
-    [SerializeField] public Matrix4x4 groundTruthProjectionMatrixRight;
+    [SerializeField] public Matrix4x4 projectionGroundTruthMatrixLeft;
+    [SerializeField] public Matrix4x4 projectionGroundTruthMatrixRight;
+    [SerializeField] public Vector3 projectionErrorLeft;
+    [SerializeField] public Vector3 projectionErrorRight;
 
+    // Fields used for 3D-3D transformation (AKA 6 DoF docking)
+    [SerializeField] public Matrix4x4 sixDoFTransformationMatrix;
+    [SerializeField] public Matrix4x4 sixDoFGroundTruthTransformationMatrix;
+    [SerializeField] public Vector3 sixDofErrorTrackerBase;
 
-    [SerializeField] public Vector3 errorLeft;
-    [SerializeField] public Vector3 errorRight;
     [SerializeField] public int pointsCollected = 0;
 
 

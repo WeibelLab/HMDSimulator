@@ -90,9 +90,11 @@ public class HandAction : MonoBehaviour
             }
             else
             {
+                # if !UNITY_EDITOR
                 Vector3 targetPosition = spaamTargetManager.PerformAlignment();
                 Vector3 objectPosition = calibrationCube.position; //TODO
                 spaamSolver.PerformAlignment(objectPosition, targetPosition);
+                #endif
             }
         }
     }

@@ -2,6 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// This class controls the simulation on the AR side of the simulator
+/// 
+/// This SPAAMTargetManager focuses on solving 4x4 matrices (Rotation + Translation)
+/// equations
+/// 
+/// </summary>
 public class SPAAMTargetManager : MonoBehaviour
 {
 
@@ -50,6 +58,30 @@ public class SPAAMTargetManager : MonoBehaviour
         DisplayCurrentTarget();
     }
 
+    public void ConditionChange(SPAAMSolver.SixDofCalibrationApproach p)
+    {
+        Debug.Log("[SPAAMTargetManager] - Starting evaluation with SixDofCalibrationApproach " + p.ToString());
+        switch (p)
+        {
+
+            case SPAAMSolver.SixDofCalibrationApproach.None:
+                HideTarget();
+                break;
+            default:
+                InitializePosition();
+                break;
+                // fornow, nothing to do with either
+
+        }
+
+        
+    }
+
+    protected virtual void HideTarget()
+    {
+        templateObject.SetActive(false);
+    }
+
     protected virtual void DisplayCurrentTarget()
     {
         templateObject.SetActive(true);
@@ -88,7 +120,7 @@ public class SPAAMTargetManager : MonoBehaviour
                 displayObject.transform.position = manualResult + offset;
             }
 
-            Debug.Log("Error:" + (groundTruthResult - manualResult).magnitude);
+            Debug.Log("[SPAAMTargetManager] Error:" + (groundTruthResult - manualResult).magnitude);
         }
     }
 
