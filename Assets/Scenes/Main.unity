@@ -175,7 +175,6 @@ GameObject:
   - component: {fileID: 1050378371}
   - component: {fileID: 1050378370}
   - component: {fileID: 1050378369}
-  - component: {fileID: 1050378372}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -227,14 +226,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &1050378372
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1050378368}
-  m_Enabled: 1
 --- !u!1 &1884365121
 GameObject:
   m_ObjectHideFlags: 0

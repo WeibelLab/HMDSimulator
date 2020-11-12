@@ -29,7 +29,7 @@ public class SPAAMSolver : MonoBehaviour
     public enum SixDofCalibrationApproach
     {
         None,
-        CubesHead,          // calibrate cubes only moving head
+        CubesHand,          // calibrate cube by moving both
         CubesHandHead,      // calibrate cubes using hand and head
         Cubes4Points,       // calibrate cubes using hand and head but with less points
         Pattern_count
@@ -199,7 +199,10 @@ public class SPAAMSolver : MonoBehaviour
         //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
         groundTruthEquation = SolveAlignment(groundTruthAlignments, true);
         manualEquation = SolveAlignment(manualAlignments, true);
+        Debug.Log("[SPAAMSolver] Calibrated:" + TrackerBase.localToWorldMatrix);
         Debug.Log("[SPAAMSolver] LocalToWorld:" + TrackerBase.localToWorldMatrix);
+        Debug.Log("[SPAAMSolver] Manual Equation:" + manualEquation);
+        Debug.Log("[SPAAMSolver] Ground Truth Equation:" + groundTruthEquation);
         groundTruthAlignments = new List<MatchingPoints>();
         manualAlignments = new List<MatchingPoints>();
         solved = true;
@@ -215,6 +218,8 @@ public class SPAAMSolver : MonoBehaviour
             audioPlayerForVoiceOver.clip = voiceOverCalibrated;
             audioPlayerForVoiceOver.Play();
         }
+
+        manager.SetCalibrated();
 
     }
 
@@ -267,7 +272,7 @@ public class SPAAMSolver : MonoBehaviour
         // calibration 1
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            sixDoFPattern = SixDofCalibrationApproach.CubesHead;
+            sixDoFPattern = SixDofCalibrationApproach.CubesHand;
             ResetPattern();
         }
 
