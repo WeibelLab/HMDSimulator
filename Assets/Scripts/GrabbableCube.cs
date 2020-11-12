@@ -7,10 +7,13 @@ public class GrabbableCube : GrabbableObject
 {
 
     public bool CanGrab = true;
+    public bool GoesBackToInitialPosition = false;
 
     //private Transform originalParent = null;
     private ParentConstraint constraint;
 
+    Vector3 initialPosition;
+    Quaternion initialRotation;
 
 
     // Start is called before the first frame update
@@ -18,6 +21,9 @@ public class GrabbableCube : GrabbableObject
     {
         //originalParent = transform.parent;
         constraint = GetComponent<ParentConstraint>();
+
+        initialPosition = this.transform.position;
+        initialRotation = this.transform.rotation;
     }
 
     // Update is called once per frame
@@ -50,5 +56,12 @@ public class GrabbableCube : GrabbableObject
         }
 
         constraint.constraintActive = false;
+
+        
+        if (GoesBackToInitialPosition)
+        {
+            this.transform.position = initialPosition;
+            this.transform.rotation = initialRotation;
+        }
     }
 }
