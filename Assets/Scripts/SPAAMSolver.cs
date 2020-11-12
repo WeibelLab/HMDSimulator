@@ -113,16 +113,26 @@ public class SPAAMSolver : MonoBehaviour
             targetPosition = targetPosition
         };
 
+        Vector3 groundTruthPosition = TrackerBase.InverseTransformPoint(targetPosition);
+
         MatchingPoints groundTruthAlignment = new MatchingPoints
         {
-            objectPosition = TrackerBase.InverseTransformPoint(targetPosition),
+            objectPosition = groundTruthPosition,
             targetPosition = targetPosition
         };
 
         manualAlignments.Add(manualAlignment);
         groundTruthAlignments.Add(groundTruthAlignment);
 
-        // save last data point for the time to task measurement
+        // saves user performance
+        expResult.sixDofObjectPosition.Add(groundTruthPosition);
+        expResult.sixDofAlignedPosition.Add(objectPosition);
+        expResult.sixDofObjectPositionAR.Add(targetPosition);
+
+        // how bad was that? (yes, we pre-calculate for now)
+        expResult.sixDofAlignmentsErrorVect.Add(groundTruthPosition - objectPosition);
+
+        // save last data point for the time-to-task measurement
         expResult.endTime = System.DateTime.Now;
         expResult.completionTime = (expResult.endTime - expResult.startTime).TotalSeconds;
 
@@ -197,12 +207,35 @@ public class SPAAMSolver : MonoBehaviour
 
         // TODO: Send info to opencv and solve the linear equation
         //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
+
+
         groundTruthEquation = SolveAlignment(groundTruthAlignments, true);
         manualEquation = SolveAlignment(manualAlignments, true);
-        Debug.Log("[SPAAMSolver] Calibrated:" + TrackerBase.localToWorldMatrix);
-        Debug.Log("[SPAAMSolver] LocalToWorld:" + TrackerBase.localToWorldMatrix);
-        Debug.Log("[SPAAMSolver] Manual Equation:" + manualEquation);
-        Debug.Log("[SPAAMSolver] Ground Truth Equation:" + groundTruthEquation);
+
+        // save results
+        expResult.sixDoFGroundTruthTransformationMatrix = groundTruthEquation;
+        expResult.sixDoFTransformationMatrix = manualEquation;
+
+        // decompose matrices so that we can calculate error
+        Vector3 rotationGroundTruth = Matrix4x4Utils.ExtractRotationFromMatrix(ref groundTruthEquation).eulerAngles,
+                rotationManual = Matrix4x4Utils.ExtractRotationFromMatrix(ref manualEquation).eulerAngles;
+
+        expResult.sixDofRotationError = rotationGroundTruth - rotationManual;
+
+        Vector3 translationGroundTruth = Matrix4x4Utils.ExtractTranslationFromMatrix(ref groundTruthEquation),
+                translationManual = Matrix4x4Utils.ExtractTranslationFromMatrix(ref manualEquation);
+
+
+        expResult.sixDofTranslationError = translationGroundTruth - translationManual;
+
+        Debug.Log("[SPAAMSolver] Original: " + TrackerBase.localToWorldMatrix);
+        Debug.Log("[SPAAMSolver] Manual: " + manualEquation);
+        Debug.Log("[SPAAMSolver] Ground Truth: " + groundTruthEquation);
+        Debug.Log("[SPAAMSolver] Translation error: " + expResult.sixDofTranslationError);
+        Debug.Log("[SPAAMSolver] Rotation error: " + expResult.sixDofRotationError);
+
+
+        // cleans lists
         groundTruthAlignments = new List<MatchingPoints>();
         manualAlignments = new List<MatchingPoints>();
         solved = true;

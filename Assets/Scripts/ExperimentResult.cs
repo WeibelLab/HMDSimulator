@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -26,10 +27,35 @@ public class ExperimentResult
     [SerializeField] public Vector3 projectionErrorRight;
 
     // Fields used for 3D-3D transformation (AKA 6 DoF docking)
-    [SerializeField] public Matrix4x4 sixDoFTransformationMatrix;
-    [SerializeField] public Matrix4x4 sixDoFGroundTruthTransformationMatrix;
-    [SerializeField] public Vector3 sixDofErrorTrackerBase;
+    [SerializeField] public Matrix4x4  sixDoFTransformationMatrix;
+    [SerializeField] public Matrix4x4  sixDoFGroundTruthTransformationMatrix;
+    [SerializeField] public Vector3    sixDofTranslationError;
+    [SerializeField] public Vector3    sixDofRotationError;
 
+    /// <summary>
+    /// Where the object should be
+    /// </summary>
+    [SerializeField] public List<Vector3> sixDofObjectPosition = new List<Vector3>();
+
+    /// <summary>
+    /// Where the user aligned it
+    /// </summary>
+    [SerializeField] public List<Vector3> sixDofAlignedPosition = new List<Vector3>();
+
+    /// <summary>
+    /// The location in the AR coordinate system
+    /// </summary>
+    [SerializeField] public List<Vector3> sixDofObjectPositionAR = new List<Vector3>();
+
+    /// <summary>
+    /// Error Vector (sixDofObjectPosition - sixDofAlignedPosition)
+    /// </summary>
+    [SerializeField] public List<Vector3> sixDofAlignmentsErrorVect = new List<Vector3>();
+
+
+    /// <summary>
+    /// Total points collected
+    /// </summary>
     [SerializeField] public int pointsCollected = 0;
 
 
