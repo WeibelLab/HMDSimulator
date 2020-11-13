@@ -15,7 +15,6 @@ public class GrabbableCube : GrabbableObject
     Vector3 initialPosition;
     Quaternion initialRotation;
 
-
     // Start is called before the first frame update
     void Start()
     {
