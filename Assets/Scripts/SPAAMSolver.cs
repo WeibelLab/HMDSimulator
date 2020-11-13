@@ -24,6 +24,9 @@ public class SPAAMSolver : MonoBehaviour
     protected Quaternion targetObjectStartRotation;
     private PoseInterpolation targetObjectLerper;
 
+    [Tooltip("If checked, calibration will happen automatically after a certain amount of points is collected")]
+    bool calibrateAutomatically = false;
+
     [Tooltip("Have we solved it?")]
     public bool solved = false;
 
@@ -80,7 +83,7 @@ public class SPAAMSolver : MonoBehaviour
     [Tooltip("Object used to move the hologram with one hand")]
     public Transform InvisibleCube;
     public Vector3 InvisibleCubeInitialPosition = new Vector3(0.0f,0.1f,0.2f);
-    private PoseInterpolation InvisibleCubeLerper; // not used now
+    private PoseInterpolation InvisibleCubeLerper;
     
 
 
@@ -92,7 +95,7 @@ public class SPAAMSolver : MonoBehaviour
 
         targetObjectLerper = targetObject.GetComponentInChildren<PoseInterpolation>();
         cubeGrabbing = targetObject.GetComponentInChildren<GrabbableCube>();
-        InvisibleCubeLerper = targetObject.GetComponentInChildren<PoseInterpolation>();
+        InvisibleCubeLerper = InvisibleCube.GetComponentInChildren<PoseInterpolation>();
     }
 
 
@@ -148,6 +151,8 @@ public class SPAAMSolver : MonoBehaviour
         // how bad was that? (yes, we pre-calculate for now)
         expResult.sixDofAlignmentsErrorVect.Add(groundTruthPosition - objectPosition);
 
+        Debug.Log(String.Format("[SPAAMSolver] Aligned {0} with {1} (expected {2}, diff: {3}", objectPosition, targetPosition, groundTruthPosition, groundTruthPosition - objectPosition));
+
         // save last data point for the time-to-task measurement
         expResult.endTime = System.DateTime.Now;
         expResult.completionTime = (expResult.endTime - expResult.startTime).TotalSeconds;
@@ -157,6 +162,17 @@ public class SPAAMSolver : MonoBehaviour
         {
             audioPlayer.clip = pointCollectedSound;
             audioPlayer.Play();
+        }
+
+        // should we calibrate automatically now that we know what's up?
+        if (calibrateAutomatically && manualAlignments.Count >= GetRequiredPointsToCalibrate((int)sixDoFPattern))
+        {
+            // solvees
+            Solve();
+
+            // saves results
+            string time = System.DateTime.UtcNow.ToString("HH_mm_ss_dd_MMMM_yyyy");
+            ExperimentResult.SaveToDrive(expResult, "result_" + sixDoFPattern.ToString() + "_" + time + ".json");
         }
 
     }
@@ -205,7 +221,7 @@ public class SPAAMSolver : MonoBehaviour
                 cubeGrabbing.GoesBackToInitialPosition = false;
                 currentCubePosition = 0;
                 targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
-                InvisibleCubeLerper.StartLerping(Camera.main.transform.position + InvisibleCubeInitialPosition, Quaternion.identity);
+                InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
                 
                 break;
         }
@@ -240,10 +256,37 @@ public class SPAAMSolver : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the number of points required for calibration
+    /// (SPAAMSolver implementations should override this class)
+    /// </summary>
+    /// <returns></returns>
+    public virtual int GetRequiredPointsToCalibrate(int calibrationid)
+    {
+        switch (calibrationid)
+        {
+            case (int)SixDofCalibrationApproach.CubesHead:
+            case (int)SixDofCalibrationApproach.CubesHandHead:
+                return 24;
+
+            case (int) SixDofCalibrationApproach.CubesHologram:
+                return 5;
+        }
+
+        return 9;
+    }
+
     public virtual void Solve()
     {
 
-        if (manualAlignments.Count < 9)
+        if (sixDoFPattern == SixDofCalibrationApproach.None)
+        {
+            Debug.LogWarning("[SPAAMSolver] Won't calibrate / solve when no modes are set!");
+            return;
+        }
+
+        // warns user that more points are needed
+        if (manualAlignments.Count < GetRequiredPointsToCalibrate((int)sixDoFPattern))
         {
             audioPlayerForVoiceOver.clip = voiceOverCollectMorePoints;
             audioPlayerForVoiceOver.Play();
@@ -297,6 +340,7 @@ public class SPAAMSolver : MonoBehaviour
             audioPlayerForVoiceOver.Play();
         }
 
+        // change what the user sees in the AR world
         manager.SetCalibrated();
 
     }
@@ -390,14 +434,16 @@ public class SPAAMSolver : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Vector3 targetPosition = manager.PerformAlignment(); // This also updates the target position on their side
-            Vector3 objectPosition = targetObject.localPosition; // TODO
+            Vector3 objectPosition = targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+
+
             PerformAlignment(objectPosition, targetPosition);
 
             if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram)
             {
                 ++currentCubePosition;
                 targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
-                InvisibleCubeLerper.StartLerping(Camera.main.transform.position + Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
+                InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
             }
 
         }
