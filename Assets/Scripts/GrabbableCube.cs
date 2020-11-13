@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
+using Valve.VR;
 
 public class GrabbableCube : GrabbableObject
 {
@@ -15,6 +16,8 @@ public class GrabbableCube : GrabbableObject
     Vector3 initialPosition;
     Quaternion initialRotation;
 
+    PoseInterpolation lerper;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,6 +26,8 @@ public class GrabbableCube : GrabbableObject
 
         initialPosition = this.transform.position;
         initialRotation = this.transform.rotation;
+
+        lerper = this.GetComponent<PoseInterpolation>();
     }
 
     // Update is called once per frame
@@ -34,7 +39,12 @@ public class GrabbableCube : GrabbableObject
     public override void Grab(Transform hand)
     {
         if (CanGrab)
-        { 
+        {
+
+            // stops lerping because of the mid-air catch
+            if (lerper != null && lerper.isLerping)
+                lerper.StopLerping();
+
             ConstraintSource cs = new ConstraintSource();
             cs.sourceTransform = hand;
             cs.weight = 1;
@@ -59,8 +69,14 @@ public class GrabbableCube : GrabbableObject
         
         if (GoesBackToInitialPosition)
         {
-            this.transform.position = initialPosition;
-            this.transform.rotation = initialRotation;
+            if (lerper == null)
+            { 
+                this.transform.position = initialPosition;
+                this.transform.rotation = initialRotation;
+            } else
+            {
+                lerper.StartLerping(initialPosition, initialRotation);
+            }
         }
     }
 }

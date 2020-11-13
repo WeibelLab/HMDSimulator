@@ -22,6 +22,7 @@ public class SPAAMSolver : MonoBehaviour
     public Transform targetObject;
     protected Vector3 targetObjectStartPosition;
     protected Quaternion targetObjectStartRotation;
+    private PoseInterpolation targetObjectLerper;
 
     [Tooltip("Have we solved it?")]
     public bool solved = false;
@@ -29,9 +30,9 @@ public class SPAAMSolver : MonoBehaviour
     public enum SixDofCalibrationApproach
     {
         None,
-        CubesHand,          // calibrate cube by moving both
+        CubesHead,          // calibrate cube by moving both
         CubesHandHead,      // calibrate cubes using hand and head
-        Cubes4Points,       // calibrate cubes using hand and head but with less points
+        CubesHologram,       // calibrate cubes by moving a hologram
         Pattern_count
     }
 
@@ -60,6 +61,7 @@ public class SPAAMSolver : MonoBehaviour
     public AudioSource audioPlayerForVoiceOver;
 
     protected SPAAMTargetManager manager;
+    protected GrabbableCube cubeGrabbing;
 
     [Header("Calibration data structures")]
     public ExperimentResult expResult;
@@ -70,6 +72,16 @@ public class SPAAMSolver : MonoBehaviour
     protected bool firstPoint = true;
 
 
+    [Header("Hologram calibration approach")]
+    [Tooltip("Where should cube go so that the user can calibrate")]
+    public Transform[] CubePositions;
+    private int currentCubePosition = 0;
+
+    [Tooltip("Object used to move the hologram with one hand")]
+    public Transform InvisibleCube;
+    public Vector3 InvisibleCubeInitialPosition = new Vector3(0.0f,0.1f,0.2f);
+    private PoseInterpolation InvisibleCubeLerper; // not used now
+    
 
 
     void Start()
@@ -77,6 +89,10 @@ public class SPAAMSolver : MonoBehaviour
         // reset points collected to zero
         groundTruthAlignments = new List<MatchingPoints>();
         manualAlignments = new List<MatchingPoints>();
+
+        targetObjectLerper = targetObject.GetComponentInChildren<PoseInterpolation>();
+        cubeGrabbing = targetObject.GetComponentInChildren<GrabbableCube>();
+        InvisibleCubeLerper = targetObject.GetComponentInChildren<PoseInterpolation>();
     }
 
 
@@ -164,6 +180,35 @@ public class SPAAMSolver : MonoBehaviour
 
         // applies changes the the local environment
         updateModalityInstructions((int)sixDoFPattern);
+
+        // updates the simulation so that we cannot grab the cube in the second one
+        switch (sixDoFPattern)
+        {
+            // none case is only for instructing the user, so shows target and allow the user to do what they want
+            case SixDofCalibrationApproach.None:
+                cubeGrabbing.CanGrab = true;
+                cubeGrabbing.GoesBackToInitialPosition = true;
+                break;
+
+            case SixDofCalibrationApproach.CubesHandHead:
+                cubeGrabbing.CanGrab = true;
+                cubeGrabbing.GoesBackToInitialPosition = true;
+                break;
+
+            case SixDofCalibrationApproach.CubesHead:
+                cubeGrabbing.CanGrab = false;
+                cubeGrabbing.GoesBackToInitialPosition = false;
+                break;
+
+            case SixDofCalibrationApproach.CubesHologram:
+                cubeGrabbing.CanGrab = false;
+                cubeGrabbing.GoesBackToInitialPosition = false;
+                currentCubePosition = 0;
+                targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
+                InvisibleCubeLerper.StartLerping(Camera.main.transform.position + InvisibleCubeInitialPosition, Quaternion.identity);
+                
+                break;
+        }
 
         if (sixDoFPattern != SixDofCalibrationApproach.None)
         {
@@ -305,7 +350,7 @@ public class SPAAMSolver : MonoBehaviour
         // calibration 1
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            sixDoFPattern = SixDofCalibrationApproach.CubesHand;
+            sixDoFPattern = SixDofCalibrationApproach.CubesHead;
             ResetPattern();
         }
 
@@ -319,7 +364,7 @@ public class SPAAMSolver : MonoBehaviour
         // calibration 3
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            sixDoFPattern = SixDofCalibrationApproach.Cubes4Points;
+            sixDoFPattern = SixDofCalibrationApproach.CubesHologram;
             ResetPattern();
         }
 
@@ -344,9 +389,17 @@ public class SPAAMSolver : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Vector3 targetPosition = manager.PerformAlignment();
-            Vector3 objectPosition = targetObject.localPosition; //TODO
+            Vector3 targetPosition = manager.PerformAlignment(); // This also updates the target position on their side
+            Vector3 objectPosition = targetObject.localPosition; // TODO
             PerformAlignment(objectPosition, targetPosition);
+
+            if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram)
+            {
+                ++currentCubePosition;
+                targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
+                InvisibleCubeLerper.StartLerping(Camera.main.transform.position + Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
+            }
+
         }
 
     }
