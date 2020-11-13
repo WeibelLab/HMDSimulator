@@ -113,7 +113,7 @@ public class SPAAMSolver : MonoBehaviour
             targetPosition = targetPosition
         };
 
-        Vector3 groundTruthPosition = TrackerBase.InverseTransformPoint(targetPosition);
+        Vector3 groundTruthPosition = TrackerBase.InverseTransformPoint(targetPosition - manager.offset); // todo: in the future, offset might include rotation
 
         MatchingPoints groundTruthAlignment = new MatchingPoints
         {
@@ -268,7 +268,7 @@ public class SPAAMSolver : MonoBehaviour
         {
             int pairStep = 6 * i;
             MatchingPoints curr = alignments[i];
-            input[pairStep] = curr.objectPosition.x;
+            input[pairStep + 0] = curr.objectPosition.x;
             input[pairStep + 1] = curr.objectPosition.y;
             input[pairStep + 2] = curr.objectPosition.z;
             input[pairStep + 3] = curr.targetPosition.x;

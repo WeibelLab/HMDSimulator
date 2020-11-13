@@ -21,7 +21,6 @@ public class SPAAMTargetManager : MonoBehaviour
     public GameObject displayObject;
     public Transform targetCoordinateSystem;
     public TrackedObject targetTrackedObject;
-    public TrackedObject groundTruthTrackedObject;
     public bool initialized = false;
 
     public List<Vector3> targetPositions = new List<Vector3>();
@@ -30,7 +29,7 @@ public class SPAAMTargetManager : MonoBehaviour
     public bool useGroundTruth = false;
     private bool wasUsingGroundTruth = false;
     public int index = 0;
-    protected Vector3 offset = new Vector3(100, 100, 100);
+    public Vector3 offset = new Vector3(100, 100, 100);
 
     protected SPAAMSolver solver;
     public void SetSolver(SPAAMSolver solver)
