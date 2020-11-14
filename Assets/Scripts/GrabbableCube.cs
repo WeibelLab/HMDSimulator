@@ -10,6 +10,8 @@ public class GrabbableCube : GrabbableObject
     public bool CanGrab = true;
     public bool GoesBackToInitialPosition = false;
 
+    public Transform CurrentlyGrabbedBy;
+
     //private Transform originalParent = null;
     private ParentConstraint constraint;
 
@@ -38,8 +40,24 @@ public class GrabbableCube : GrabbableObject
 
     public override void Grab(Transform hand)
     {
+  
+
         if (CanGrab)
         {
+
+
+            if (CurrentlyGrabbedBy != null)
+            {
+                // releases
+                if (constraint.sourceCount > 0)
+                {
+                    constraint.RemoveSource(0);
+                }
+
+                constraint.constraintActive = false;
+                CurrentlyGrabbedBy = null;
+            }
+
 
             // stops lerping because of the mid-air catch
             if (lerper != null && lerper.isLerping)
@@ -54,11 +72,30 @@ public class GrabbableCube : GrabbableObject
             constraint.SetTranslationOffset(0, positionOffset);
             constraint.SetRotationOffset(0, rotationOffset.eulerAngles);
             constraint.constraintActive = true;
+            CurrentlyGrabbedBy = hand;
         } 
+    }
+
+    public void SendBackToInitialPose()
+    {
+
+        if (lerper == null)
+        {
+            this.transform.position = initialPosition;
+            this.transform.rotation = initialRotation;
+        }
+        else
+        {
+            lerper.StartLerping(initialPosition, initialRotation);
+        }
     }
 
     public override void Release(Transform hand)
     {
+
+        if (CurrentlyGrabbedBy != hand)
+            return;
+
         if (constraint.sourceCount > 0)
         {
             constraint.RemoveSource(0);
@@ -69,14 +106,7 @@ public class GrabbableCube : GrabbableObject
         
         if (GoesBackToInitialPosition)
         {
-            if (lerper == null)
-            { 
-                this.transform.position = initialPosition;
-                this.transform.rotation = initialRotation;
-            } else
-            {
-                lerper.StartLerping(initialPosition, initialRotation);
-            }
+            SendBackToInitialPose();
         }
     }
 }

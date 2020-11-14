@@ -22,6 +22,8 @@ public class HandAction : MonoBehaviour
 
     public GrabbableObject objectInHand = null;
 
+    public bool GetPointWhenTrigger = false;
+
     /// <summary>
     /// spaamTargetManager is a singleton set during runtime in the AR scene (so there is no direct way of linking it
     /// in the VR scene)
@@ -90,18 +92,21 @@ public class HandAction : MonoBehaviour
             }
             else
             {
-                # if !UNITY_EDITOR
-                Vector3 targetPosition = spaamTargetManager.PerformAlignment();
-                Vector3 objectPosition = calibrationCube.position; //TODO
-                spaamSolver.PerformAlignment(objectPosition, targetPosition);
-                #endif
+                if (GetPointWhenTrigger)
+                {
+
+                    Vector3 targetPosition = spaamTargetManager.PerformAlignment();
+                    Vector3 objectPosition = calibrationCube.localPosition; //TODO
+                    spaamSolver.PerformAlignment(objectPosition, targetPosition);
+
+                }
             }
         }
     }
 
     public void MenuDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
-        Debug.Log("MenuDown");
+        /*Debug.Log("MenuDown");
         if (fromSource == handType)
         {
             if (!spaamTargetManager.initialized)
@@ -112,7 +117,7 @@ public class HandAction : MonoBehaviour
             {
                 spaamSolver.Solve();
             }
-        }
+        }*/
     }
 
     void OnTriggerEnter(Collider other)
@@ -139,10 +144,13 @@ public class HandAction : MonoBehaviour
         float distance = float.MaxValue;
         foreach (GrabbableObject GameObj in closeGameObjects)
         {
-            if ((GameObj.transform.position - transform.position).sqrMagnitude < distance)
-            {
-                closestGameObject = GameObj;
-                distance = (GameObj.transform.position - transform.position).sqrMagnitude;
+            if (GameObj.enabled)
+            { 
+                if ((GameObj.transform.position - transform.position).sqrMagnitude < distance)
+                {
+                    closestGameObject = GameObj;
+                    distance = (GameObj.transform.position - transform.position).sqrMagnitude;
+                }
             }
         }
 

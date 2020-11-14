@@ -27,6 +27,7 @@ public class ExperimentResult
     [SerializeField] public Vector3 projectionErrorRight;
 
     // Fields used for 3D-3D transformation (AKA 6 DoF docking)
+    [SerializeField] public Matrix4x4  sixDoFAutoAlignedMatrix;
     [SerializeField] public Matrix4x4  sixDoFTransformationMatrix;
     [SerializeField] public Matrix4x4  sixDoFGroundTruthTransformationMatrix;
     [SerializeField] public Vector3    sixDofTranslationError;

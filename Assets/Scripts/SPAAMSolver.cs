@@ -20,12 +20,17 @@ public class SPAAMSolver : MonoBehaviour
     
     [Tooltip("Object that the user will interact with in order to perform calibration")]
     public Transform targetObject;
+    public Transform targetCoordinateSystem;
+    public Transform sphere1;
+    public Transform sphere2;
+    public Transform sphere3;
+    public Transform sphere4;
     protected Vector3 targetObjectStartPosition;
     protected Quaternion targetObjectStartRotation;
     private PoseInterpolation targetObjectLerper;
 
     [Tooltip("If checked, calibration will happen automatically after a certain amount of points is collected")]
-    bool calibrateAutomatically = false;
+    public bool calibrateAutomatically = false;
 
     [Tooltip("Have we solved it?")]
     public bool solved = false;
@@ -204,16 +209,19 @@ public class SPAAMSolver : MonoBehaviour
             case SixDofCalibrationApproach.None:
                 cubeGrabbing.CanGrab = true;
                 cubeGrabbing.GoesBackToInitialPosition = true;
+                cubeGrabbing.SendBackToInitialPose();
                 break;
 
             case SixDofCalibrationApproach.CubesHandHead:
                 cubeGrabbing.CanGrab = true;
                 cubeGrabbing.GoesBackToInitialPosition = true;
+                cubeGrabbing.SendBackToInitialPose();
                 break;
 
             case SixDofCalibrationApproach.CubesHead:
-                cubeGrabbing.CanGrab = false;
-                cubeGrabbing.GoesBackToInitialPosition = false;
+                cubeGrabbing.CanGrab = true;
+                cubeGrabbing.GoesBackToInitialPosition = true;
+                cubeGrabbing.SendBackToInitialPose();
                 break;
 
             case SixDofCalibrationApproach.CubesHologram:
@@ -270,7 +278,7 @@ public class SPAAMSolver : MonoBehaviour
                 return 24;
 
             case (int) SixDofCalibrationApproach.CubesHologram:
-                return 5;
+                return 24;
         }
 
         return 9;
@@ -301,8 +309,12 @@ public class SPAAMSolver : MonoBehaviour
         manualEquation = SolveAlignment(manualAlignments, true);
 
         // save results
-        expResult.sixDoFGroundTruthTransformationMatrix = groundTruthEquation;
+        expResult.sixDoFAutoAlignedMatrix = groundTruthEquation;
+        expResult.sixDoFGroundTruthTransformationMatrix = targetCoordinateSystem.localToWorldMatrix;
         expResult.sixDoFTransformationMatrix = manualEquation;
+
+        // points?
+        expResult.pointsCollected = manualAlignments.Count;
 
         // decompose matrices so that we can calculate error
         Vector3 rotationGroundTruth = Matrix4x4Utils.ExtractRotationFromMatrix(ref groundTruthEquation).eulerAngles,
@@ -339,6 +351,10 @@ public class SPAAMSolver : MonoBehaviour
             audioPlayerForVoiceOver.clip = voiceOverCalibrated;
             audioPlayerForVoiceOver.Play();
         }
+
+        // allow the user to move the object
+        cubeGrabbing.CanGrab = true;
+        cubeGrabbing.GoesBackToInitialPosition = false;
 
         // change what the user sees in the AR world
         manager.SetCalibrated();
@@ -431,19 +447,47 @@ public class SPAAMSolver : MonoBehaviour
             audioPlayerForVoiceOver.Play();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+
+
+        // Skips a point if needed
+        if (Input.GetKeyDown(KeyCode.N))
         {
-            Vector3 targetPosition = manager.PerformAlignment(); // This also updates the target position on their side
-            Vector3 objectPosition = targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
-
-
-            PerformAlignment(objectPosition, targetPosition);
+            manager.NextPoint();
 
             if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram)
             {
                 ++currentCubePosition;
                 targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
                 InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
+            }
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram || sixDoFPattern == SixDofCalibrationApproach.CubesHead)
+            {
+                Tuple<Vector3,Vector3,Vector3,Vector3> targetPositions = manager.PerformAlignmentSpecial();
+                Vector3 objectPosition1 = targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+                Vector3 objectPosition2 = targetCoordinateSystem.InverseTransformPoint(sphere1.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+                Vector3 objectPosition3 = targetCoordinateSystem.InverseTransformPoint(sphere2.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+                Vector3 objectPosition4 = targetCoordinateSystem.InverseTransformPoint(sphere3.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+
+                PerformAlignment(objectPosition1, targetPositions.Item1);
+                PerformAlignment(objectPosition2, targetPositions.Item2);
+                PerformAlignment(objectPosition3, targetPositions.Item3);
+                PerformAlignment(objectPosition4, targetPositions.Item4);
+
+                ++currentCubePosition;
+                targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
+                InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
+            } else
+            {
+                Vector3 targetPosition = manager.PerformAlignment(); // This also updates the target position on their side
+                Vector3 objectPosition = targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+
+
+                PerformAlignment(objectPosition, targetPosition);
             }
 
         }
@@ -461,8 +505,6 @@ public class SPAAMSolver : MonoBehaviour
 
         targetObjectStartPosition = targetObject.localPosition;
         targetObjectStartRotation = targetObject.localRotation;
-
-
 
         update();
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using UnityEngine;
@@ -19,6 +20,14 @@ public class SPAAMTargetManager : MonoBehaviour
 
     public GameObject camera;
     public GameObject templateObject;
+
+    public Transform sphere1;
+    public Transform sphere2;
+    public Transform sphere3;
+    public Transform line1;
+    public Transform line2;
+    public Transform line3;
+
     private PoseInterpolation templateObjectLerper; // let's make this fun, shall we?
     private TrackedObject templateInvisibleTracker; // used for the hologram scenario where the user can move the hologram (not the real object)
 
@@ -69,15 +78,13 @@ public class SPAAMTargetManager : MonoBehaviour
         Debug.Log("[SPAAMTargetManager] - Starting evaluation with SixDofCalibrationApproach " + p.ToString());
 
         // hide visualization that we show when calibrated
-        if (!displayObject.activeInHierarchy)
-        {
-            displayObject.SetActive(false);
-        }
+        displayObject.SetActive(false);
+        
 
         // cleans the transformation
         targetCoordinateSystem.position = offset;
         targetCoordinateSystem.rotation = Quaternion.identity;
-
+        
         // reset other variables
         useGroundTruth = false;
         wasUsingGroundTruth = false;
@@ -112,6 +119,14 @@ public class SPAAMTargetManager : MonoBehaviour
                 // template should become a child of the headset
                 templateObject.transform.parent = camera.transform;
 
+                changeVisibility(sphere1, true);
+                changeVisibility(sphere2, true);
+                changeVisibility(sphere3, true);
+                changeVisibility(line1, true);
+                changeVisibility(line2, true);
+                changeVisibility(line3, true);
+
+
                 // initialize variables
                 InitializePosition();
 
@@ -126,6 +141,13 @@ public class SPAAMTargetManager : MonoBehaviour
 
                 // making sure that template is a child of this target manager
                 templateObject.transform.parent = this.transform;
+
+                changeVisibility(sphere1, false);
+                changeVisibility(sphere2, false);
+                changeVisibility(sphere3, false);
+                changeVisibility(line1, false);
+                changeVisibility(line2, false);
+                changeVisibility(line3, false);
 
                 // initialize variables
                 InitializePosition();
@@ -144,8 +166,21 @@ public class SPAAMTargetManager : MonoBehaviour
                     Debug.LogError("[SPAAMTargetManager] Hologram calibration won't work because template doesn't have a tracker!");
                 }
 
+
+                // shows all spheres 
+                changeVisibility(sphere1, true);
+                changeVisibility(sphere2, true);
+                changeVisibility(sphere3, true);
+                changeVisibility(line1, true);
+                changeVisibility(line2, true);
+                changeVisibility(line3, true);
+
                 // making sure that template is a child of this target manager
                 templateObject.transform.parent = this.transform;
+
+                index = 0;
+                initialized = true;
+                DisplayCurrentTarget();
 
                 break;
         }
@@ -213,11 +248,18 @@ public class SPAAMTargetManager : MonoBehaviour
             case SPAAMSolver.SixDofCalibrationApproach.CubesHead:
                 templateObject.SetActive(true);
                 if (templateObjectLerper != null)
-                    templateObjectLerper.LerpPose(camera.transform.TransformPoint(targetPositions[index]));
+                    templateObjectLerper.LerpPose(transformedTargetPosition[index]);
                 else
-                    templateObject.transform.position = camera.transform.TransformPoint(targetPositions[index]);
+                    templateObject.transform.position = transformedTargetPosition[index];
 
                 templateObject.transform.localRotation = Quaternion.identity;
+
+                changeVisibility(sphere1, true);
+                changeVisibility(sphere2, true);
+                changeVisibility(sphere3, true);
+                changeVisibility(line1, true);
+                changeVisibility(line2, true);
+                changeVisibility(line3, true);
                 break;
 
             // move holograms around
@@ -229,12 +271,26 @@ public class SPAAMTargetManager : MonoBehaviour
                     templateObject.transform.position = transformedTargetPosition[index];
 
                 templateObject.transform.localRotation = Quaternion.identity;
+                changeVisibility(sphere1, false);
+                changeVisibility(sphere2, false);
+                changeVisibility(sphere3, false);
+                changeVisibility(line1, false);
+                changeVisibility(line2, false);
+                changeVisibility(line3, false);
                 break;
 
 
             // move the template somewhere right in front of the user so that they pick it up
             case SPAAMSolver.SixDofCalibrationApproach.CubesHologram:
                 templateObject.SetActive(true);
+
+                changeVisibility(sphere1, true);
+                changeVisibility(sphere2, true);
+                changeVisibility(sphere3, true);
+                changeVisibility(line1, true);
+                changeVisibility(line2, true);
+                changeVisibility(line3, true);
+
                 // what we really do here is to move a real, invisible object on the VR side
                 // this object has a tracker that influences the hologram here, and therefor
                 // makes it appear to the user
@@ -243,6 +299,52 @@ public class SPAAMTargetManager : MonoBehaviour
         }
         
     }
+
+    public virtual void NextPoint()
+    {
+        // do nothing when in the first screen
+        if (solver.sixDoFPattern == SPAAMSolver.SixDofCalibrationApproach.None)
+            return;
+        switch (solver.sixDoFPattern)
+        {
+            // gets the position of the cube (somewhere in front of the headset)
+            case SPAAMSolver.SixDofCalibrationApproach.CubesHead:
+                index = (index + 1) % targetPositions.Count;
+                DisplayCurrentTarget();
+                break;
+
+            // basically the position we created a while back
+            case SPAAMSolver.SixDofCalibrationApproach.CubesHandHead:
+                index = (index + 1) % targetPositions.Count;
+                DisplayCurrentTarget();
+                break;
+
+            // basically the location of the hologram  (NOTE: Take a look at the SpaamSolver -> This has a special thing happening there)
+            case SPAAMSolver.SixDofCalibrationApproach.CubesHologram:
+                DisplayCurrentTarget();
+                break;
+
+        }
+
+    }
+
+
+    static public void changeVisibility(Transform t, bool visible)
+    {
+        // show / hide all meshes
+        foreach (MeshRenderer me in t.GetComponentsInChildren<MeshRenderer>())
+        {
+            me.enabled = visible;
+        }
+
+        foreach (LineRenderer le in t.GetComponentsInChildren<LineRenderer>())
+        {
+            le.enabled = visible;
+        }
+
+    }
+
+
 
     /// <summary>
     /// Returns the current location of the target and updates the target to the next position
@@ -265,7 +367,7 @@ public class SPAAMTargetManager : MonoBehaviour
 
             // basically the position we created a while back
             case SPAAMSolver.SixDofCalibrationApproach.CubesHandHead:
-                target = transformedTargetPosition[index];
+                target = templateObject.transform.position;
                 index = (index + 1) % targetPositions.Count;
                 DisplayCurrentTarget();
                 break;
@@ -283,6 +385,51 @@ public class SPAAMTargetManager : MonoBehaviour
         }
 
         return target;
+    }
+
+    /// <summary>
+    /// Returns the current location of the target and updates the target to the next position
+    /// </summary>
+    /// <returns></returns>
+    public virtual Tuple<Vector3, Vector3, Vector3, Vector3> PerformAlignmentSpecial()
+    {
+        // do nothing when in the first screen
+        if (solver.sixDoFPattern == SPAAMSolver.SixDofCalibrationApproach.None)
+            return new Tuple<Vector3, Vector3, Vector3, Vector3>(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero);
+        Vector3 target;
+        switch (solver.sixDoFPattern)
+        {
+            // gets the position of the cube (somewhere in front of the headset)
+            case SPAAMSolver.SixDofCalibrationApproach.CubesHead:
+                target = templateObject.transform.position;
+                index = (index + 1) % targetPositions.Count;
+                DisplayCurrentTarget();
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(target, sphere1.position, sphere2.position, sphere3.position);
+                
+
+            // basically the position we created a while back
+            case SPAAMSolver.SixDofCalibrationApproach.CubesHandHead:
+                target = templateObject.transform.position;
+                index = (index + 1) % targetPositions.Count;
+                DisplayCurrentTarget();
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(target, sphere1.position, sphere2.position, sphere3.position);
+                
+
+            // basically the location of the hologram  (NOTE: Take a look at the SpaamSolver -> This has a special thing happening there)
+            case SPAAMSolver.SixDofCalibrationApproach.CubesHologram:
+                target = templateObject.transform.position;
+                DisplayCurrentTarget();
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(target, sphere1.position, sphere2.position, sphere3.position);
+                
+
+            default:
+                
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero);
+                
+
+        }
+
+
     }
 
     protected virtual void update()
