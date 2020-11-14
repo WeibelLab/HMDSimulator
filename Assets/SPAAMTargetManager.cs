@@ -98,6 +98,7 @@ public class SPAAMTargetManager : MonoBehaviour
                 // making sure that template is a child of this target manager
                 templateObject.transform.parent = this.transform;
 
+
                 HideTarget();
 
                 // this should not be enabled -> only for holograms
@@ -117,7 +118,8 @@ public class SPAAMTargetManager : MonoBehaviour
                     templateInvisibleTracker.enabled = false;
 
                 // template should become a child of the headset
-                templateObject.transform.parent = camera.transform;
+                templateObject.transform.parent = this.transform;
+
 
                 changeVisibility(sphere1, true);
                 changeVisibility(sphere2, true);
