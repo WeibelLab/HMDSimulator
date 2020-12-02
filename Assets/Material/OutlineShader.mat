@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: OutlineShader
-  m_Shader: {fileID: 4800000, guid: 209d08b85c03616489899d258e69054d, type: 3}
+  m_Shader: {fileID: 4800000, guid: 0c1cf10ea69e60e4f9eb8955749f88ec, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -25,6 +25,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Outline: 0.05
+    - g_flCornerAdjust: 0.5
+    - g_flOutlineWidth: 0.005
     m_Colors:
-    - _Color: {r: 1, g: 0.51534945, b: 0, a: 1}
+    - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - g_vOutlineColor: {r: 0.9339623, g: 0.93340033, b: 0.86788005, a: 1}
