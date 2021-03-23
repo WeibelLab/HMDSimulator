@@ -24,9 +24,10 @@ public class SPAAMTargetManager : MonoBehaviour
     public Transform sphere1;
     public Transform sphere2;
     public Transform sphere3;
-    public Transform line1;
-    public Transform line2;
-    public Transform line3;
+    public Transform optitrackThingie;
+    //public Transform line1;
+    //public Transform line2;
+    //public Transform line3;
 
     private PoseInterpolation templateObjectLerper; // let's make this fun, shall we?
     private TrackedObject templateInvisibleTracker; // used for the hologram scenario where the user can move the hologram (not the real object)
@@ -124,9 +125,10 @@ public class SPAAMTargetManager : MonoBehaviour
                 changeVisibility(sphere1, true);
                 changeVisibility(sphere2, true);
                 changeVisibility(sphere3, true);
-                changeVisibility(line1, true);
-                changeVisibility(line2, true);
-                changeVisibility(line3, true);
+                changeVisibility(optitrackThingie, true);
+                //changeVisibility(line1, true);
+                //changeVisibility(line2, true);
+                //changeVisibility(line3, true);
 
 
                 // initialize variables
@@ -147,9 +149,10 @@ public class SPAAMTargetManager : MonoBehaviour
                 changeVisibility(sphere1, false);
                 changeVisibility(sphere2, false);
                 changeVisibility(sphere3, false);
-                changeVisibility(line1, false);
-                changeVisibility(line2, false);
-                changeVisibility(line3, false);
+                changeVisibility(optitrackThingie, false);
+                //changeVisibility(line1, false);
+                //changeVisibility(line2, false);
+                //changeVisibility(line3, false);
 
                 // initialize variables
                 InitializePosition();
@@ -173,9 +176,10 @@ public class SPAAMTargetManager : MonoBehaviour
                 changeVisibility(sphere1, true);
                 changeVisibility(sphere2, true);
                 changeVisibility(sphere3, true);
-                changeVisibility(line1, true);
-                changeVisibility(line2, true);
-                changeVisibility(line3, true);
+                changeVisibility(optitrackThingie, true);
+                //changeVisibility(line1, true);
+                //changeVisibility(line2, true);
+                //changeVisibility(line3, true);
 
                 // making sure that template is a child of this target manager
                 templateObject.transform.parent = this.transform;
@@ -259,9 +263,10 @@ public class SPAAMTargetManager : MonoBehaviour
                 changeVisibility(sphere1, true);
                 changeVisibility(sphere2, true);
                 changeVisibility(sphere3, true);
-                changeVisibility(line1, true);
-                changeVisibility(line2, true);
-                changeVisibility(line3, true);
+                changeVisibility(optitrackThingie, true);
+                //changeVisibility(line1, true);
+                //changeVisibility(line2, true);
+                //changeVisibility(line3, true);
                 break;
 
             // move holograms around
@@ -276,9 +281,10 @@ public class SPAAMTargetManager : MonoBehaviour
                 changeVisibility(sphere1, false);
                 changeVisibility(sphere2, false);
                 changeVisibility(sphere3, false);
-                changeVisibility(line1, false);
-                changeVisibility(line2, false);
-                changeVisibility(line3, false);
+                changeVisibility(optitrackThingie, false);
+                //changeVisibility(line1, false);
+                //changeVisibility(line2, false);
+                //changeVisibility(line3, false);
                 break;
 
 
@@ -289,9 +295,10 @@ public class SPAAMTargetManager : MonoBehaviour
                 changeVisibility(sphere1, true);
                 changeVisibility(sphere2, true);
                 changeVisibility(sphere3, true);
-                changeVisibility(line1, true);
-                changeVisibility(line2, true);
-                changeVisibility(line3, true);
+                changeVisibility(optitrackThingie, true);
+                //changeVisibility(line1, true);
+                //changeVisibility(line2, true);
+                //changeVisibility(line3, true);
 
                 // what we really do here is to move a real, invisible object on the VR side
                 // this object has a tracker that influences the hologram here, and therefor
