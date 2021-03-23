@@ -54,20 +54,39 @@ public class CameraMovement : MonoBehaviour
         transform.Translate(straffe, 0, translation);
         transform.localPosition = new Vector3(transform.localPosition.x, y, transform.localPosition.z); // makes sure not to go up
 
-        // press space to lock
-        if (Input.GetKey(KeyCode.Space))
+        // left  mouse click to interact
+        if (Input.GetMouseButtonDown(1))
         {
             mouseControl = true;
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }
 
+        // escape to stop interactio
         if (Input.GetKey(KeyCode.Escape))
         {
             mouseControl = false;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
+
+        // plus and minus to adjust height
+        if (Input.GetKeyDown(KeyCode.Plus))
+        {
+            Vector3 pos = transform.localPosition;
+            pos.y += 0.05f;
+            transform.localPosition = pos;
+        }
+
+
+        // plus and minus to adjust height
+        if (Input.GetKeyDown(KeyCode.Minus))
+        {
+            Vector3 pos = transform.localPosition;
+            pos.y -= 0.05f;
+            transform.localPosition = pos;
+        }
+
 
 
         if (mouseControl)
