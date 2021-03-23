@@ -468,7 +468,7 @@ public class SPAAMSolver : MonoBehaviour
             if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram || sixDoFPattern == SixDofCalibrationApproach.CubesHead)
             {
                 Tuple<Vector3,Vector3,Vector3,Vector3> targetPositions = manager.PerformAlignmentSpecial();
-                Vector3 objectPosition1 = targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+                Vector3 objectPosition1 = targetCoordinateSystem.InverseTransformPoint(sphere4.position); // this is the main sphere
                 Vector3 objectPosition2 = targetCoordinateSystem.InverseTransformPoint(sphere1.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
                 Vector3 objectPosition3 = targetCoordinateSystem.InverseTransformPoint(sphere2.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
                 Vector3 objectPosition4 = targetCoordinateSystem.InverseTransformPoint(sphere3.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
@@ -484,7 +484,7 @@ public class SPAAMSolver : MonoBehaviour
             } else
             {
                 Vector3 targetPosition = manager.PerformAlignment(); // This also updates the target position on their side
-                Vector3 objectPosition = targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+                Vector3 objectPosition = targetCoordinateSystem.InverseTransformPoint(sphere4.position);// targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
 
 
                 PerformAlignment(objectPosition, targetPosition);

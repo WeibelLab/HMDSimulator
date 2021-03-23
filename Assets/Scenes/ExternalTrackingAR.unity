@@ -2582,6 +2582,7 @@ MonoBehaviour:
   sphere1: {fileID: 8283029646605170920}
   sphere2: {fileID: 8283029647704302020}
   sphere3: {fileID: 8283029647047896719}
+  sphere4: {fileID: 3834444458682374756}
   optitrackThingie: {fileID: 3834444458682374754}
   displayObject: {fileID: 2058968737738859387}
   targetCoordinateSystem: {fileID: 1731729073}
@@ -3275,6 +3276,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 242676684206207545, guid: cecec0ae2e3dfb84dbd5745d3319aace,
+        type: 3}
+      propertyPath: m_Name
+      value: green
+      objectReference: {fileID: 0}
+    - target: {fileID: 242676685080096627, guid: cecec0ae2e3dfb84dbd5745d3319aace,
+        type: 3}
+      propertyPath: m_Name
+      value: gray
+      objectReference: {fileID: 0}
+    - target: {fileID: 242676685323823893, guid: cecec0ae2e3dfb84dbd5745d3319aace,
+        type: 3}
+      propertyPath: m_Name
+      value: red
+      objectReference: {fileID: 0}
+    - target: {fileID: 242676685764394352, guid: cecec0ae2e3dfb84dbd5745d3319aace,
+        type: 3}
+      propertyPath: m_Name
+      value: blue
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cecec0ae2e3dfb84dbd5745d3319aace, type: 3}
 --- !u!4 &3834444458682374754 stripped
@@ -3286,6 +3307,12 @@ Transform:
 --- !u!1 &3834444458682374755 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 242676684048185296, guid: cecec0ae2e3dfb84dbd5745d3319aace,
+    type: 3}
+  m_PrefabInstance: {fileID: 3834444458682374753}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3834444458682374756 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 242676685080096636, guid: cecec0ae2e3dfb84dbd5745d3319aace,
     type: 3}
   m_PrefabInstance: {fileID: 3834444458682374753}
   m_PrefabAsset: {fileID: 0}

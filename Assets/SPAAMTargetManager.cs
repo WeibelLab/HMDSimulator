@@ -24,6 +24,7 @@ public class SPAAMTargetManager : MonoBehaviour
     public Transform sphere1;
     public Transform sphere2;
     public Transform sphere3;
+    public Transform sphere4;
     public Transform optitrackThingie;
     //public Transform line1;
     //public Transform line2;
@@ -413,7 +414,7 @@ public class SPAAMTargetManager : MonoBehaviour
                 target = templateObject.transform.position;
                 index = (index + 1) % targetPositions.Count;
                 DisplayCurrentTarget();
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(target, sphere1.position, sphere2.position, sphere3.position);
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(sphere4.position, sphere1.position, sphere2.position, sphere3.position);
                 
 
             // basically the position we created a while back
@@ -421,14 +422,14 @@ public class SPAAMTargetManager : MonoBehaviour
                 target = templateObject.transform.position;
                 index = (index + 1) % targetPositions.Count;
                 DisplayCurrentTarget();
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(target, sphere1.position, sphere2.position, sphere3.position);
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(sphere4.position, sphere1.position, sphere2.position, sphere3.position);
                 
 
             // basically the location of the hologram  (NOTE: Take a look at the SpaamSolver -> This has a special thing happening there)
             case SPAAMSolver.SixDofCalibrationApproach.CubesHologram:
                 target = templateObject.transform.position;
                 DisplayCurrentTarget();
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(target, sphere1.position, sphere2.position, sphere3.position);
+                return new Tuple<Vector3, Vector3, Vector3, Vector3>(sphere4.position, sphere1.position, sphere2.position, sphere3.position);
                 
 
             default:
