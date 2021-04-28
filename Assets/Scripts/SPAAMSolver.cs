@@ -122,6 +122,11 @@ public class SPAAMSolver : MonoBehaviour
         }
     }
 
+    string PrintVector(Vector3 v)
+    {
+        return String.Format("({0,7:000.0000},{1,7:000.0000},{2,7:000.0000})", v.x, v.y, v.z);
+    }
+
     public virtual void PerformAlignment(Vector3 objectPosition, Vector3 targetPosition)
     {
         if (firstPoint)
@@ -156,7 +161,7 @@ public class SPAAMSolver : MonoBehaviour
         // how bad was that? (yes, we pre-calculate for now)
         expResult.sixDofAlignmentsErrorVect.Add(groundTruthPosition - objectPosition);
 
-        Debug.Log(String.Format("[SPAAMSolver] Aligned {0} with {1} (expected {2}, diff: {3}", objectPosition, targetPosition, groundTruthPosition, groundTruthPosition - objectPosition));
+        Debug.Log(String.Format("[SPAAMSolver] Aligned {0} with {1} (expected {2}, diff: {3}", PrintVector(objectPosition), PrintVector(targetPosition), PrintVector(groundTruthPosition), PrintVector(groundTruthPosition - objectPosition)));
 
         // save last data point for the time-to-task measurement
         expResult.endTime = System.DateTime.Now;
@@ -333,6 +338,13 @@ public class SPAAMSolver : MonoBehaviour
         Debug.Log("[SPAAMSolver] Ground Truth: " + groundTruthEquation);
         Debug.Log("[SPAAMSolver] Translation error: " + expResult.sixDofTranslationError);
         Debug.Log("[SPAAMSolver] Rotation error: " + expResult.sixDofRotationError);
+
+        Debug.Log("[SPAAMSolver] Resulting rotation: " + PrintVector(rotationManual));
+        Debug.Log("[SPAAMSolver] Resulting rotation (ground truth): " + PrintVector(rotationGroundTruth));
+
+        Debug.Log("[SPAAMSolver] Resulting translation: " + PrintVector(translationManual));
+        Debug.Log("[SPAAMSolver] Resulting translation (ground truth): " + PrintVector(translationGroundTruth));
+
 
 
         // cleans lists
