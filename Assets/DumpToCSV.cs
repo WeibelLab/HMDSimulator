@@ -39,9 +39,16 @@ public class DumpToCSV : MonoBehaviour
 
     public struct DataPoint
     {
-        public float timestamp;
+        public long timestamp;
         public Vector3 position;
         public Quaternion rotation;
+
+        public void RecordPoint(long ts, Vector3 pos, Quaternion rot)
+        {
+            timestamp = ts;
+            position = pos;
+            rotation = rot;
+        }
     }
 
     // Start is called before the first frame update
@@ -67,8 +74,7 @@ public class DumpToCSV : MonoBehaviour
             // allocate tracked objects and their memory
             dataset.trackedObjects = new TrackedObject[totalObjectsTracked];
 
-            // allocate memory for each tracked point for this coordinate system
-            
+            // allocate memory for each tracked point for this coordinate system           
             for (int i = 0; i < dataset.trackedObjects.Length; ++i)
             {
                 dataset.trackedObjects[i] = new TrackedObject();
@@ -84,6 +90,10 @@ public class DumpToCSV : MonoBehaviour
                 }
 
                 trackedObj.trackedPoints = new DataPoint[pointsToRecord];
+               // for (int j = 0; j < pointsToRecord; ++j)
+               // {
+               //     trackedObj.trackedPoints[j] = new DataPoint();
+               // }
                 
             }
 
@@ -112,11 +122,56 @@ public class DumpToCSV : MonoBehaviour
         }
 
         // are we recording?
+        if (isRecording)
+        {
+            long milliseconds = System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond;
+
+            for (int datasetId = 0; datasetId < coordinateSystemCenters.Length; ++datasetId)
+            {
+                var dataset = datasets[datasetId];
+
+                // headset pose
+                
+                // finds the local position of the tracked object wrt to a different coordinate system
+                Matrix4x4 headsetInCurrentDataset = datasets[datasetId].worldToLocal * headsetTransform.localToWorldMatrix; // local ToWorldMatrix changes every frame
+                dataset.trackedObjects[0].trackedPoints[pointsRecorded].timestamp = milliseconds;
+                dataset.trackedObjects[0].trackedPoints[pointsRecorded].rotation = headsetInCurrentDataset.rotation;
+                dataset.trackedObjects[0].trackedPoints[pointsRecorded].position = headsetInCurrentDataset.MultiplyPoint3x4(Vector3.zero);
+
+                // for each tracked tiara
+                for (int i = 1; i <= tiarasTransform.Length; ++i)
+                {
+                    var trackedObj = dataset.trackedObjects[i];
+
+                    Matrix4x4 tiaraTransformInCoordinateSystem = datasets[datasetId].worldToLocal * tiarasTransform[i-1].localToWorldMatrix; // local ToWorldMatrix changes every frame
+                    trackedObj.trackedPoints[pointsRecorded].timestamp = milliseconds;
+                    trackedObj.trackedPoints[pointsRecorded].rotation = tiaraTransformInCoordinateSystem.rotation;
+                    trackedObj.trackedPoints[pointsRecorded].position = tiaraTransformInCoordinateSystem.MultiplyPoint3x4(Vector3.zero);
+                }
+
+            }
+
+            // increase the points recorded pointer
+            pointsRecorded++;
+        }
 
     }
 
     void SaveDataRecorded()
     {
+        string pathToSave = Application.dataPath;
+        foreach (var dataset in datasets)
+        {
+            foreach (var trackedObj in dataset.trackedObjects)
+            {
+                string csvFilename = string.Format("{0}\\{1}-{2}.csv", pathToSave, dataset.coordinateSystemName, trackedObj.isHeadset ? "headset" : trackedObj.trackedObjectName);
+
+                Debug.Log(string.Format("[DumpToCSV] - (Fake) Done saving {0} data points to to file {1}",pointsRecorded,csvFilename));
+            }
+            
+        }
+
+        
 
     }
 
