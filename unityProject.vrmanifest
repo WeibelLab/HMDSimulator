@@ -2,13 +2,13 @@
   "source": "Unity",
   "applications": [
     {
-      "app_key": "application.generated.unity.simulator.exe",
+      "app_key": "application.generated.unity.arvrsimulator.exe",
       "launch_type": "url",
       "url": "steam://launch/",
-      "action_manifest_path": "C:\\Users\\danilo\\projects\\HMDSimulator\\HMDSimulator\\actions.json",
+      "action_manifest_path": "C:\\Users\\danil\\Projects\\HMDSimulator\\Assets\\StreamingAssets\\SteamVR\\actions.json",
       "strings": {
         "en_us": {
-          "name": "Simulator [Testing]"
+          "name": "ARVRSimulator [Testing]"
         }
       }
     }
