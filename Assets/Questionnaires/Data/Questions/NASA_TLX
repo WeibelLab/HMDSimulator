@@ -10,7 +10,7 @@
          "qData":[
             {
                "qId":"g1",
-               "qText":"Mental Demand:				How mentally demanding was the task?",
+               "qText":"Mental Demand:\nHow much mental and perceptual activity was required (e.g., thinking, deciding, calculating, remembering, looking, searching, etc.)? Was the task easy or demanding, simple or complex, exacting or forgiving?",
                "qMandatory":"true",
                "qMin":"0",
                "qMinLabel":"Low",
