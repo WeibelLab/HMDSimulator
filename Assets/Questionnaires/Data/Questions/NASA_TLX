@@ -10,7 +10,7 @@
          "qData":[
             {
                "qId":"g1",
-               "qText":"Mental Demand:\nHow much mental and perceptual activity was required (e.g., thinking, deciding, calculating, remembering, looking, searching, etc.)? Was the task easy or demanding, simple or complex, exacting or forgiving?",
+               "qText":"Mental Demand:				How mentally demanding was the task?",
                "qMandatory":"true",
                "qMin":"0",
                "qMinLabel":"Low",
@@ -62,7 +62,7 @@
             },
             {
                "qId":"g6",
-               "qText":"Frustration:  How insecure; discouraged; irritated; stressed; and annoyed were you?",
+               "qText":"Frustration:  How insecure, discouraged, irritated, stressed, and annoyed were you?",
                "qMandatory":"true",
                "qMin":"0",
                "qMinLabel":"Low",

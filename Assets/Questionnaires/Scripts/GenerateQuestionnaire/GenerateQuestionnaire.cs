@@ -109,6 +109,9 @@ namespace VRQuestionnaireToolkit
 
             Questionnaires[0].SetActive(true);
 
+            // after creating all questinnaries, then we scale the canvas to match our needs
+            this.transform.localScale = new Vector3(0.003138105f, 0.003138105f, 0.01f);
+
         }
 
         void GenerateNewQuestionnaire(string inputPath)
@@ -132,8 +135,6 @@ namespace VRQuestionnaireToolkit
             numberQuestionnaires++;
 
             ReadJson(inputPath);
-
-            this.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
         }
 
         void ReadJson(string jsonPath)

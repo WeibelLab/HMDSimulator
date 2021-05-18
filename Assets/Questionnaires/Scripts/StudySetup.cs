@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// StudySetup.class
@@ -15,21 +17,136 @@ namespace VRQuestionnaireToolkit
 {
     public class StudySetup : MonoBehaviour
     {
-        // Start is called before the first frame update
         public string ParticipantId;
         public string Condition;
-        private bool ControllerTactileFeedbackOnOff;
-        private bool SoundOnOff;
 
+        [Tooltip("Switch on/off tactile feedback.")]
+        public bool ControllerTactileFeedbackOnOff = true;
+        [Tooltip("Switch on/off sound feedback.")]
+        public bool SoundOnOff = true;
+        [Tooltip("Also write the result of the current participant to a summary table which contains the results of ALL participants.")]
+        public bool AlsoConsolidateResults = true;
+
+        [Header("Customize feedback parameters on hovering:")]
+        [Range(0, 1)]
+        public float vibratingDurationForHovering = 0.05f;
+        [Range(0, 200)]
+        public float vibratingFrequencyForHovering = 1.0f;
+        [Range(0, 100)]
+        public float vibratingAmplitudeForHovering = 5.0f;
+        [Tooltip("Choose the audio file to play upon hovering over a button.")]
+        public AudioClip soundClipForHovering;
+        [Range(0.0f, 1.0f)]
+        public float hoveringVolume = 1.0f;
+
+        [Header("Customize feedback parameters on selecting:")]
+        [Range(0, 1)]
+        public float vibratingDurationForSelecting = 0.05f;
+        [Range(0, 200)]
+        public float vibratingFrequencyForSelecting = 200.0f;
+        [Range(0, 100)]
+        public float vibratingAmplitudeForSelecting = 1.0f;
+        [Tooltip("Choose the audio file to play upon selecting on a button.")]
+        public AudioClip soundClipForSelecting;
+        [Range(0.0f, 1.0f)]
+        public float selectingVolume = 1.0f;
+
+        private string _path; // file path to write the remembered transform values to
 
         void Start()
         {
-
+            
         }
 
-        // Update is called once per frame
-        void Update()
+
+        /// <summary>
+        /// Resize the questionnaire panel by hitting keys + and -.
+        /// </summary>
+        void AdjustTransform()
         {
+            // Press + to scale up
+            if (Input.GetKeyDown(KeyCode.Equals) || Input.GetKeyDown(KeyCode.KeypadPlus))
+                this.transform.localScale = Vector3.Scale(this.transform.localScale, new Vector3(1.1f, 1.1f, 1.0f));
+            // Press - to scale down
+            if (Input.GetKeyDown(KeyCode.Minus) || Input.GetKeyDown(KeyCode.KeypadMinus))
+                this.transform.localScale = Vector3.Scale(this.transform.localScale, new Vector3(0.9f, 0.9f, 1.0f));
+
+            // Press UpArrow to push the panel farther away
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+                this.transform.Translate(new Vector3(0.0f, 0.0f, 0.2f));
+            // Press DownArrow to bring the panel closer
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+                this.transform.Translate(new Vector3(0.0f, 0.0f, -0.2f));
+
+            // Press 0 to reset transform (position, rotation & scale)
+            if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0))
+                SetTransformToDefault();
+        }
+
+        /// <summary>
+        /// Write a string to a file at certain path.
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="filePath"></param>
+        void WriteStringToFile(string str, string filePath)
+        {
+            StreamWriter sw = new StreamWriter(filePath);
+            sw.WriteLine(str);
+            sw.Close();
+        }
+
+        /// <summary>
+        /// Read the content of a file as a string.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        string ReadStringFromFile(string filePath)
+        {
+            string str;
+            StreamReader sr = new StreamReader(filePath);
+            str = sr.ReadToEnd();
+            sr.Close();
+            return str;
+        }
+
+        /// <summary>
+        /// Write the current position/rotation/scale values to a .txt file under the Resource folder.
+        /// </summary>
+        void SaveCurrentValues()
+        {
+            string thingsToWrite;
+            thingsToWrite = transform.localPosition.x + "," + transform.localPosition.y + "," + transform.localPosition.z + "," +
+                "\n" + transform.localRotation.x + "," + transform.localRotation.y + "," + transform.localRotation.z + "," + transform.localRotation.w + "," +
+                "\n" + transform.localScale.x + "," + transform.localScale.y + "," + transform.localScale.z;
+            WriteStringToFile(thingsToWrite, _path);
+        }
+
+        /// <summary>
+        /// Read the saved values from the .txt file and setting the transform accordingly.
+        /// </summary>
+        void SetTransformToSavedValues()
+        {
+            string[] strings = ReadStringFromFile(_path).Split(',');
+            float[] values = new float[10];
+            for (int i = 0; i < strings.Length; i++)
+            {
+                values[i] = float.Parse(strings[i]);
+            }
+            this.transform.localPosition = new Vector3(values[0], values[1], values[2]);
+            this.transform.localRotation = new Quaternion(values[3], values[4], values[5], values[6]);
+            this.transform.localScale = new Vector3(values[7], values[8], values[9]);
+        }
+
+        /// <summary>
+        /// Set the questionnaire panel to its default position, rotation and scale.
+        /// </summary>
+        void SetTransformToDefault()
+        {
+            // AR/VR Simulator fixes this
+            //this.transform.localPosition = new Vector3(0.0f, 1.0f, 6.0f);
+            //this.transform.localRotation = Quaternion.identity;
+            
+
 
         }
     }
