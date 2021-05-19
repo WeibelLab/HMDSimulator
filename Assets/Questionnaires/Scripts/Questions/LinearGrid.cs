@@ -32,7 +32,7 @@ namespace VRQuestionnaireToolkit
         public List<GameObject> LinearGridList; //contains all radiobuttons which correspond to one question
 
         //qText look how many q in one file >4 deny
-        public List<GameObject> CreateLinearGridQuestion(string questionnaireId, string qType, string qInstructions, string qId, string qText, JSONArray qOptions, int numberQuestion, RectTransform questionRec, bool qMandatory, int qMin, int qMax, string qMinxLabel, string qMaxLabel)
+        public List<GameObject> CreateLinearGridQuestion(string questionnaireId, string qType, string qInstructions, string qId, string qText, JSONArray qOptions, int numberQuestion, RectTransform questionRec, bool qMandatory, int qMin, int qMax, string qMinxLabel, string qMaxLabel, float pad = 0)
         {
             this.QuestionnaireId = questionnaireId;
             this.QId = qId;
@@ -105,11 +105,9 @@ namespace VRQuestionnaireToolkit
             // Place in hierarchy 
             RectTransform radioRec = temp.GetComponent<RectTransform>();
             radioRec.SetParent(_questionRecTest);
-            radioRec.localPosition = new Vector3(-120 + (numOptions * 20), 90 - (numQuestions * 95), 0);
+            radioRec.localPosition = new Vector3(-120 + (numOptions * 20), 60 - (numQuestions * 150), 0);
             radioRec.localRotation = Quaternion.identity;
             radioRec.localScale = new Vector3(radioRec.localScale.x * 0.01f, radioRec.localScale.y * 0.01f, radioRec.localScale.z * 0.01f);
-
-
             if (numOptions == 0)
             {
                 temp.GetComponentInChildren<Toggle>().GetComponentsInChildren<TextMeshProUGUI>()[0].text =

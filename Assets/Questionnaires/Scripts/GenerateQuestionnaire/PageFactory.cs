@@ -246,10 +246,10 @@ namespace VRQuestionnaireToolkit
                         else
                             text.text = _qData[i][1];
 
-                        text.transform.localPosition = new Vector3(0, 100 - (i * 95), text.transform.localPosition.z);
+                        
                         SetRec(radioHorizontalRec);
-
                         QuestionList.Add(temp.GetComponent<LinearGrid>().CreateLinearGridQuestion(qId, qType, qInstructions, _qData[i][0], _qData[i][1], qOptions, i, radioHorizontalRec, _qData[i][2].AsBool, _qData[i][3], _qData[i][5], _qData[i][4], _qData[i][6]));
+                        text.transform.localPosition = new Vector3(0, 125 - (i * 145), text.transform.localPosition.z);
                     }
                     break;
                 case "linearSlider":
@@ -382,7 +382,7 @@ namespace VRQuestionnaireToolkit
             //ensuring correct placement and scaling in the UI
             TextMeshProUGUI text = temp.GetComponentInChildren<TextMeshProUGUI>();
             text.text = qText;
-            text.transform.localPosition = new Vector3(0, 60, text.transform.localPosition.z);
+            text.transform.localPosition = new Vector3(0, 15, text.transform.localPosition.z);
             SetRec(pageFinalRec);
 
             _newPage.SetActive(false);
