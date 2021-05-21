@@ -58,6 +58,15 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/TriggerPull",
+      "type": "vector1",
+      "requirement": "optional"
+    },
+    {
+      "name": "/actions/default/in/PerformCalibration",
+      "type": "boolean"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },

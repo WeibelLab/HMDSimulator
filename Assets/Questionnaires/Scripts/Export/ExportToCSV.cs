@@ -5,10 +5,8 @@ using System.Text;
 using System.IO;
 using System;
 using TMPro;
-using UnityEditor.Build.Content;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using UnityEngine.WSA;
 using Application = UnityEngine.Application;
 using UnityEngine.Networking;
 

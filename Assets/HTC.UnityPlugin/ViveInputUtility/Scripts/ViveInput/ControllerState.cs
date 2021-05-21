@@ -133,7 +133,7 @@ namespace HTC.UnityPlugin.Vive
                 EnumUtils.SetFlag(ref currButtonPressed, (int)ControllerButton.Axis4, currState.GetButtonPress(VRModuleRawButton.Axis4));
                 EnumUtils.SetFlag(ref currButtonPressed, (int)ControllerButton.Axis4Touch, currState.GetButtonTouch(VRModuleRawButton.Axis4));
 
-                // update axis values
+                // update squeezeAxis values
                 currAxisValue[(int)ControllerAxis.PadX] = currState.GetAxisValue(VRModuleRawAxis.TouchpadX);
                 currAxisValue[(int)ControllerAxis.PadY] = currState.GetAxisValue(VRModuleRawAxis.TouchpadY);
                 currAxisValue[(int)ControllerAxis.Trigger] = currState.GetAxisValue(VRModuleRawAxis.Trigger);
@@ -233,7 +233,7 @@ namespace HTC.UnityPlugin.Vive
                     hairTriggerLimit = Mathf.Min(hairTriggerLimit, currTriggerValue);
                 }
 
-                // record pad down axis values
+                // record pad down squeezeAxis values
                 if (GetPressDown(ControllerButton.Pad))
                 {
                     padDownAxis = new Vector2(currAxisValue[(int)ControllerAxis.PadX], currAxisValue[(int)ControllerAxis.PadY]);
@@ -470,8 +470,8 @@ namespace HTC.UnityPlugin.Vive
                             var currX = GetAxis(xAxis, false);
                             var currY = GetAxis(yAxis, false);
 
-                            // filter out invalid axis values
-                            // assume that valid axis value is never zero
+                            // filter out invalid squeezeAxis values
+                            // assume that valid squeezeAxis value is never zero
                             // note: don't know why sometimes even trackpad touched (GetKey(Trackpad)==true), GetAxis(Trackpad) still get zero values
                             if ((prevX == 0f && prevY == 0f) || (currX == 0f && currY == 0f))
                             {

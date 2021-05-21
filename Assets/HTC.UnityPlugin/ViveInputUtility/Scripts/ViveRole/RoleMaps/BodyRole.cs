@@ -63,7 +63,7 @@ namespace HTC.UnityPlugin.Vive
 
             // get related poses and record controller/tracker devices
             var hmdPose = VivePose.GetPose(0u);
-            // preserve only y-axis rotation
+            // preserve only y-squeezeAxis rotation
             hmdPose.rot = Quaternion.Euler(0f, hmdPose.rot.eulerAngles.y, 0f);
             // move center to half height
             hmdPose.pos = Vector3.Scale(hmdPose.pos, new Vector3(1f, 0.5f, 1f));

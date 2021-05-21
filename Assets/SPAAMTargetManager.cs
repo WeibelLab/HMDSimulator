@@ -255,11 +255,17 @@ public class SPAAMTargetManager : MonoBehaviour
             case SPAAMSolver.SixDofCalibrationApproach.CubesHead:
                 templateObject.SetActive(true);
                 if (templateObjectLerper != null)
-                    templateObjectLerper.LerpPose(transformedTargetPosition[index]);
+                {
+                    templateObjectLerper.StartLerping(transformedTargetPosition[index], UnityEngine.Random.rotation);
+                    
+                }
                 else
+                { 
                     templateObject.transform.position = transformedTargetPosition[index];
+                    templateObject.transform.rotation = UnityEngine.Random.rotation;
+                }
 
-                templateObject.transform.localRotation = Quaternion.identity;
+                //templateObject.transform.localRotation = Quaternion.identity;
 
                 changeVisibility(sphere1, true);
                 changeVisibility(sphere2, true);

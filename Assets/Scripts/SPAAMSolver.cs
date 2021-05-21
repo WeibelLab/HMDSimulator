@@ -18,6 +18,9 @@ public class MatchingPoints
 public class SPAAMSolver : MonoBehaviour
 {
     
+    [Header("Calibration target")]
+
+
     [Tooltip("Object that the user will interact with in order to perform calibration")]
     public Transform targetObject;
     public Transform targetCoordinateSystem;
@@ -34,6 +37,7 @@ public class SPAAMSolver : MonoBehaviour
 
     [Tooltip("Have we solved it?")]
     public bool solved = false;
+
 
     public enum SixDofCalibrationApproach
     {
@@ -70,6 +74,13 @@ public class SPAAMSolver : MonoBehaviour
 
     protected SPAAMTargetManager manager;
     protected GrabbableCube cubeGrabbing;
+
+    [Header("Survey")]
+    [Tooltip("(ReadOnly) Set to true when the user is being presented with a survey")]
+    public bool inSurveyMode = false;
+    public Transform vrSurvey;
+    public Transform leftHandPointer;
+    public Transform rightHandPointer;
 
     [Header("Calibration data structures")]
     public ExperimentResult expResult;
@@ -279,8 +290,9 @@ public class SPAAMSolver : MonoBehaviour
         switch (calibrationid)
         {
             case (int)SixDofCalibrationApproach.CubesHead:
+                return 48;
             case (int)SixDofCalibrationApproach.CubesHandHead:
-                return 24;
+                return 25;
 
             case (int) SixDofCalibrationApproach.CubesHologram:
                 return 24;
@@ -309,7 +321,6 @@ public class SPAAMSolver : MonoBehaviour
         // TODO: Send info to opencv and solve the linear equation
         //Matrix4x4 groundTruth = SolveAlignment(groundTruthAlignments, false);
 
-
         groundTruthEquation = SolveAlignment(groundTruthAlignments, true);
         manualEquation = SolveAlignment(manualAlignments, true);
 
@@ -330,7 +341,6 @@ public class SPAAMSolver : MonoBehaviour
         Vector3 translationGroundTruth = Matrix4x4Utils.ExtractTranslationFromMatrix(ref groundTruthEquation),
                 translationManual = Matrix4x4Utils.ExtractTranslationFromMatrix(ref manualEquation);
 
-
         expResult.sixDofTranslationError = translationGroundTruth - translationManual;
 
         Debug.Log("[SPAAMSolver] Original: " + TrackerBase.localToWorldMatrix);
@@ -344,7 +354,6 @@ public class SPAAMSolver : MonoBehaviour
 
         Debug.Log("[SPAAMSolver] Resulting translation: " + PrintVector(translationManual));
         Debug.Log("[SPAAMSolver] Resulting translation (ground truth): " + PrintVector(translationGroundTruth));
-
 
 
         // cleans lists
@@ -447,7 +456,7 @@ public class SPAAMSolver : MonoBehaviour
         }
 
         //
-        // Saves results if the user presses Space
+        // Saves results if the user presses Enter
         //
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
@@ -458,7 +467,6 @@ public class SPAAMSolver : MonoBehaviour
             audioPlayerForVoiceOver.clip = voiceOverResultsSaved;
             audioPlayerForVoiceOver.Play();
         }
-
 
 
         // Skips a point if needed
@@ -474,36 +482,40 @@ public class SPAAMSolver : MonoBehaviour
             }
         }
 
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram || sixDoFPattern == SixDofCalibrationApproach.CubesHead)
-            {
-                Tuple<Vector3,Vector3,Vector3,Vector3> targetPositions = manager.PerformAlignmentSpecial();
-                Vector3 objectPosition1 = targetCoordinateSystem.InverseTransformPoint(sphere4.position); // this is the main sphere
-                Vector3 objectPosition2 = targetCoordinateSystem.InverseTransformPoint(sphere1.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
-                Vector3 objectPosition3 = targetCoordinateSystem.InverseTransformPoint(sphere2.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
-                Vector3 objectPosition4 = targetCoordinateSystem.InverseTransformPoint(sphere3.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
-
-                PerformAlignment(objectPosition1, targetPositions.Item1);
-                PerformAlignment(objectPosition2, targetPositions.Item2);
-                PerformAlignment(objectPosition3, targetPositions.Item3);
-                PerformAlignment(objectPosition4, targetPositions.Item4);
-
-                ++currentCubePosition;
-                targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
-                InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
-            } else
-            {
-                Vector3 targetPosition = manager.PerformAlignment(); // This also updates the target position on their side
-                Vector3 objectPosition = targetCoordinateSystem.InverseTransformPoint(sphere4.position);// targetObject.localPosition; // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
-
-
-                PerformAlignment(objectPosition, targetPosition);
-            }
-
+            PerformAlignment();
         }
 
+    }
+
+    // performs alignment with the current positions
+    public void PerformAlignment()
+    {
+        if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram || sixDoFPattern == SixDofCalibrationApproach.CubesHead)
+        {
+            Tuple<Vector3, Vector3, Vector3, Vector3> targetPositions = manager.PerformAlignmentSpecial();
+            Vector3 objectPosition1 = targetCoordinateSystem.InverseTransformPoint(sphere4.position); // this is the main sphere
+            Vector3 objectPosition2 = targetCoordinateSystem.InverseTransformPoint(sphere1.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+            Vector3 objectPosition3 = targetCoordinateSystem.InverseTransformPoint(sphere2.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+            Vector3 objectPosition4 = targetCoordinateSystem.InverseTransformPoint(sphere3.position); // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+
+            PerformAlignment(objectPosition1, targetPositions.Item1);
+            PerformAlignment(objectPosition2, targetPositions.Item2);
+            PerformAlignment(objectPosition3, targetPositions.Item3);
+            PerformAlignment(objectPosition4, targetPositions.Item4);
+
+            ++currentCubePosition;
+            targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
+            InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
+        }
+        else
+        {
+            Vector3 targetPosition = manager.PerformAlignment();                                       // This also updates the target position on their side
+            Vector3 objectPosition = targetCoordinateSystem.InverseTransformPoint(sphere4.position);   // Gets the local position of the tracker (as we can only know the object's location with respect to its own coordinate system)
+
+            PerformAlignment(objectPosition, targetPosition);
+        }
     }
 
     void Update()

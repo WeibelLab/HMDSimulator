@@ -121,6 +121,22 @@ namespace Valve.VR
             }
         }
         
+        public virtual SteamVR_Action_Single TriggerPull
+        {
+            get
+            {
+                return SteamVR_Actions.default_TriggerPull;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean PerformCalibration
+        {
+            get
+            {
+                return SteamVR_Actions.default_PerformCalibration;
+            }
+        }
+        
         public virtual SteamVR_Action_Vibration Haptic
         {
             get

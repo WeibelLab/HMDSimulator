@@ -6,40 +6,40 @@ using Valve.VR;
 public class HandAction : MonoBehaviour
 {
 
-    // a reference to the action
-    public SteamVR_Action_Single Squeeze;
-    public SteamVR_Action_Boolean GrabGrip;
-    public SteamVR_Action_Boolean MenuClick;
 
     // a reference to the hand
+    [Header("Hand configuration")]
     public SteamVR_Input_Sources handType;
 
-    public List<GrabbableObject> closeGameObjects = new List<GrabbableObject>();
 
-    public float axis = 0;
-
-    public float triggerThreshold = 0.5f;
-
-    public GrabbableObject objectInHand = null;
-
-    public bool GetPointWhenTrigger = false;
+    [Header("Calibration interface")]
 
     /// <summary>
     /// spaamTargetManager is a singleton set during runtime in the AR scene (so there is no direct way of linking it
     /// in the VR scene)
     /// </summary>
+    public SteamVR_Action_Boolean Trigger;
+    public bool GetPointWhenTrigger = true;
     [HideInInspector]
     public SPAAMTargetManager spaamTargetManager;
-
     public SPAAMSolver spaamSolver;
 
-    public Transform calibrationCube;
+
+    [Header("Holding objects")]
+    public SteamVR_Action_Single Squeeze;
+
+    public float triggerThreshold = 0.5f;
+    public bool canHoldObjects = true;
+    public GrabbableObject objectInHand = null;
+    [HideInInspector]
+    public List<GrabbableObject> closeGameObjects = new List<GrabbableObject>();
+
 
     void Start()
     {
-        Squeeze.AddOnChangeListener(TriggerDown, handType);
-        GrabGrip.AddOnStateDownListener(GripDown, handType);
-        MenuClick.AddOnStateDownListener(MenuDown, handType);
+        Squeeze.AddOnChangeListener(SqueezeDown, handType);
+        Trigger.AddOnChangeListener(TriggerDown, handType);
+
     }
 
     void Update()
@@ -50,11 +50,11 @@ public class HandAction : MonoBehaviour
         }
     }
 
-    public void TriggerDown(SteamVR_Action_Single fromAction, SteamVR_Input_Sources fromSource, float newAxis, float newDelta)
+    public void SqueezeDown(SteamVR_Action_Single fromAction, SteamVR_Input_Sources fromSource, float newAxis, float newDelta)
     {
+        if (!canHoldObjects) return;
         if (fromSource == handType)
         {
-            axis = newAxis;
             //Debug.Log("Trigger down: " + newAxis);
             if (newAxis > triggerThreshold)
             {
@@ -81,43 +81,22 @@ public class HandAction : MonoBehaviour
         }
     }
 
-    public void GripDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
+    public void TriggerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool pressed)
     {
-        //Debug.Log("gripdown");
+        Debug.Log("trigger down");
         if (fromSource == handType)
         {
-            if (!spaamTargetManager.initialized)
+            Debug.Log("trigger down 1");
+            if (pressed)
             {
-                spaamTargetManager.InitializePosition();
-            }
-            else
-            {
+                Debug.Log("trigger down 2");
                 if (GetPointWhenTrigger)
                 {
-
-                    Vector3 targetPosition = spaamTargetManager.PerformAlignment();
-                    Vector3 objectPosition = calibrationCube.localPosition; //TODO
-                    spaamSolver.PerformAlignment(objectPosition, targetPosition);
-
+                    spaamSolver.PerformAlignment();
                 }
             }
+            
         }
-    }
-
-    public void MenuDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
-    {
-        /*Debug.Log("MenuDown");
-        if (fromSource == handType)
-        {
-            if (!spaamTargetManager.initialized)
-            {
-                spaamTargetManager.InitializePosition();
-            }
-            else
-            {
-                spaamSolver.Solve();
-            }
-        }*/
     }
 
     void OnTriggerEnter(Collider other)

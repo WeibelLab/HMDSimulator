@@ -15,7 +15,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
             EditorApplication.update += EnforceInputManagerBindings;
         }
 
-        // Add joystick axis input bindings to InputManager
+        // Add joystick squeezeAxis input bindings to InputManager
         // See OpenVR/Oculus left/right controllers mapping at
         // https://docs.unity3d.com/Manual/OpenVRControllers.html
         private static void EnforceInputManagerBindings()
@@ -95,7 +95,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
             axisProperty.FindPropertyRelative("snap").boolValue = axis.snap;
             axisProperty.FindPropertyRelative("invert").boolValue = axis.invert;
             axisProperty.FindPropertyRelative("type").intValue = axis.type;
-            axisProperty.FindPropertyRelative("axis").intValue = axis.axis;
+            axisProperty.FindPropertyRelative("squeezeAxis").intValue = axis.axis;
             axisProperty.FindPropertyRelative("joyNum").intValue = axis.joyNum;
             serializedInputSettings.ApplyModifiedProperties();
         }

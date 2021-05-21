@@ -32,12 +32,6 @@ public class GrabbableCube : GrabbableObject
         lerper = this.GetComponent<PoseInterpolation>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public override void Grab(Transform hand)
     {
   

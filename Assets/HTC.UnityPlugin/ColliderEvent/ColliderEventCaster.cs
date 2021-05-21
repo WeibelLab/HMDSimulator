@@ -220,7 +220,7 @@ namespace HTC.UnityPlugin.ColliderEvent
                 }
             }
 
-            // process axis events
+            // process squeezeAxis events
             for (int i = 0, imax = axisEventDataList.Count; i < imax; ++i)
             {
                 var eventData = axisEventDataList[i];
