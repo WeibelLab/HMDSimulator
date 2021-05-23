@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// CalibrationEvalTargetManager manages the AR side of the calibration
 /// 
 /// (Given that the VR side needs to access it to communicate what changes it should apply
-/// to the headset, this object is a singleton (see SPAAMTargetManager implementation) )
+/// to the headset, this object is a singleton (see AugmentedRealityCalibrationManager implementation) )
 /// </summary>
 public class CalibrationEvalTargetManager : SPAAMTargetManager
 {

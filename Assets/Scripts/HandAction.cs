@@ -21,8 +21,8 @@ public class HandAction : MonoBehaviour
     public SteamVR_Action_Boolean Trigger;
     public bool GetPointWhenTrigger = true;
     [HideInInspector]
-    public SPAAMTargetManager spaamTargetManager;
-    public SPAAMSolver spaamSolver;
+    public AugmentedRealityCalibrationManager spaamTargetManager;
+    public RealWorldCalibrationManager spaamSolver;
 
 
     [Header("Holding objects")]
@@ -46,7 +46,7 @@ public class HandAction : MonoBehaviour
     {
         if (!spaamTargetManager)
         {
-            spaamTargetManager = SPAAMTargetManager.Instance;
+            spaamTargetManager = AugmentedRealityCalibrationManager.Instance;
         }
     }
 
@@ -81,15 +81,15 @@ public class HandAction : MonoBehaviour
         }
     }
 
-    public void TriggerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool pressed)
+    public void TriggerDown(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource, bool state)
     {
-        Debug.Log("trigger down");
+        //Debug.Log("trigger down");
         if (fromSource == handType)
         {
-            Debug.Log("trigger down 1");
-            if (pressed)
+            //Debug.Log("trigger down 1");
+            if (!state)
             {
-                Debug.Log("trigger down 2");
+                //Debug.Log("trigger down 2");
                 if (GetPointWhenTrigger)
                 {
                     spaamSolver.PerformAlignment();
