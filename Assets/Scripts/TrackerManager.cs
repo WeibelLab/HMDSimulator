@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 public class TrackerManager : MonoBehaviour
 {
     private Dictionary<string, TrackerBehavior> trackers = new Dictionary<string, TrackerBehavior>();
-    private Dictionary<string, TrackedObject> trackedObjects = new Dictionary<string, TrackedObject>();
+    private Dictionary<string, List<TrackedObject>> trackedObjects = new Dictionary<string, List<TrackedObject>>();
 
     public void UpdateTrackers(string realName, string arName)
     {
@@ -21,24 +21,32 @@ public class TrackerManager : MonoBehaviour
                 trackers.Add(tracker.trackerName, tracker);
             }
         }
-
+        
         // only allow tracked objects in the AR scene
         foreach (TrackedObject tracked in Object.FindObjectsOfType(typeof(TrackedObject)))
         {
             if (tracked.gameObject?.scene.name?.CompareTo(arName) == 0)
             {
-                trackedObjects.Add(tracked.trackerName, tracked);
+                if (!trackedObjects.ContainsKey(tracked.trackerName))
+                {
+                    trackedObjects[tracked.trackerName] = new List<TrackedObject>();
+                }
+
+                trackedObjects[tracked.trackerName].Add(tracked);
             }
         }
     }
 
     public void ForceUpdateTrackedObject()
     {
-        foreach (TrackedObject tracked in trackedObjects.Values)
+        foreach (List<TrackedObject> tracked in trackedObjects.Values)
         {
-            if (tracked.isActiveAndEnabled)
-            {
-                tracked.PerformUpdate();
+            foreach (TrackedObject t in tracked)
+            { 
+                if (t.isActiveAndEnabled)
+                {
+                    t.PerformUpdate();
+                }
             }
         }
     }

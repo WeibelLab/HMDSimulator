@@ -8,6 +8,7 @@ public class TrackedObject : MonoBehaviour
     public string trackerName = "";
 
     public bool isLocal = false;
+
     // For now
     public Vector3 offset = new Vector3(100, 100, 100);
 
