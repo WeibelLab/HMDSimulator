@@ -26,6 +26,8 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     public static AugmentedRealityCalibrationManager Instance { get { return _instance; } }
     public Vector3 offset = new Vector3(100, 100, 100);
 
+    public Transform ARCoordinateSystem;
+
     [Header("Current state")]
     public bool initialized = false;
     public bool useGroundTruth = false;
@@ -136,7 +138,10 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         targetObjectHighlight.SetActive(false);
 
         // cleans the transformation
-        targetCoordinateSystemTransform.position = offset;
+        ARCoordinateSystem.transform.position = offset;
+        ARCoordinateSystem.transform.rotation = Quaternion.identity;
+
+        targetCoordinateSystemTransform.position = Vector3.zero;
         targetCoordinateSystemTransform.rotation = Quaternion.identity;
 
         // reset other variables
