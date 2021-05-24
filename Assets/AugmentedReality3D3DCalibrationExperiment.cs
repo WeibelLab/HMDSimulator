@@ -10,7 +10,8 @@ using UnityEngine;
 /// Experiments are design as Ax=B equations where x is a Pose transform and A and B are sets of
 /// matching points
 /// </summary>
-public class AugmentedReality3D3DCalibrationExperiment : MonoBehaviour
+[Serializable]
+public class AugmentedReality3D3DCalibrationExperiment
 {
     [Header("What calibration is being stored here")]
     public string CalibrationModalityName;

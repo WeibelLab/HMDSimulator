@@ -93,10 +93,16 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     public AugmentedReality3D3DCalibrationExperiment calibrationExperiment;
 
 
-    protected RealWorldCalibrationManager solver;
-    public void SetSolver(RealWorldCalibrationManager solver)
+    protected RealWorldCalibrationManager VRSimulation;
+
+    /// <summary>
+    /// This method should be invoked by the VR counterpart of the simulator
+    /// to create a communication channel between the headset and the VR simulation
+    /// </summary>
+    /// <param name="solver"></param>
+    public void SetRealWorldController(RealWorldCalibrationManager solver)
     {
-        this.solver = solver;
+        this.VRSimulation = solver;
     }
 
     void Awake()
@@ -110,9 +116,14 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-
-
-    public void ConditionChange(CalibrationModality p)
+    #region Calibration State Machine and User Interaction
+    /// <summary>
+    /// Changes the current calibration modality
+    /// 
+    /// If the calibration modality is the same as the current one, then it resets it
+    /// </summary>
+    /// <param name="p">New calibration modality</param>
+    public void ChangeCalibrationModality(CalibrationModality p)
     {
         Debug.Log("[AugmentedRealityCalibrationManager] - Starting evaluation with " + p.ToString());
 
@@ -229,43 +240,6 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// This method should be set when the the solver calibrated - use this to hide calibration cube
-    /// </summary>
-    /// <param name="calibrated"></param>
-    public virtual void SetCalibrated()
-    {
-        // hides calibration target
-        HideTarget();
-
-        if (calibrationExperiment.FullCalibrationStored)
-        {
-            // shows visualization of the cube as seen by the AR device after calibration
-            if (!targetObjectHighlight.activeInHierarchy)
-            {
-                targetObjectHighlight.SetActive(true);
-            }
-
-            ApplyMatrixToTargetCoordinateSystem(ref calibrationExperiment.manualEquation);
-        }
-
-    }
-
-    protected virtual void ApplyMatrixToTargetCoordinateSystem(ref Matrix4x4 m)
-    {
-        targetCoordinateSystemTransform.transform.localPosition = Matrix4x4Utils.ExtractTranslationFromMatrix(ref m);
-        targetCoordinateSystemTransform.transform.localRotation = Matrix4x4Utils.ExtractRotationFromMatrix(ref m);
-    }
-
-    /// <summary>
-    /// Hides the calibration target
-    /// </summary>
-    protected virtual void HideTarget()
-    {
-        // Also hide the template object
-        virtualCalibrationTarget.SetActive(false);
-    }
-
-    /// <summary>
     /// Displays the calibration target at a new location
     /// </summary>
     protected virtual void DisplayCurrentTarget()
@@ -328,7 +302,14 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         }
 
     }
-
+    /// <summary>
+    /// Hides the calibration target
+    /// </summary>
+    protected virtual void HideTarget()
+    {
+        // Also hide the template object
+        virtualCalibrationTarget.SetActive(false);
+    }
     /// <summary>
     /// Displays the next point the user should interact with
     /// </summary>
@@ -356,6 +337,65 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Called every time there is a condition / state change so that the location
+    /// of the targets are accurate with respect to the HMD
+    /// </summary>
+    public virtual void InitializePosition()
+    {
+        transformedTargetPosition.Clear();
+        for (int i = 0; i < virtualTargetPositions.Count; i++)
+        {
+            transformedTargetPosition.Add(ARCamera.transform.TransformPoint(virtualTargetPositions[i]));
+        }
+        index = 0;
+        initialized = true;
+        DisplayCurrentTarget();
+    }
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        virtualCalibrationTargetLerper = virtualCalibrationTarget.GetComponent<PoseInterpolation>();
+        VRUserInteractionTracker = virtualCalibrationTarget.GetComponent<TrackedObject>();
+    }
+
+
+    #endregion
+    /// <summary>
+    /// Clal this method to hide calibration targetsa dn to apply an existing calibration matrix
+    /// </summary>
+    /// <param name="calibrated"></param>
+    public virtual void SetCalibrated()
+    {
+        // hides calibration target
+        HideTarget();
+
+        if (calibrationExperiment.FullCalibrationStored)
+        {
+            // shows visualization of the cube as seen by the AR device after calibration
+            if (!targetObjectHighlight.activeInHierarchy)
+            {
+                targetObjectHighlight.SetActive(true);
+            }
+
+            ApplyMatrixToTargetCoordinateSystem(ref calibrationExperiment.manualEquation);
+        } else
+        {
+            Debug.LogWarning("Not calibrated!");
+        }
+
+    }
+
+    protected virtual void ApplyMatrixToTargetCoordinateSystem(ref Matrix4x4 m)
+    {
+        targetCoordinateSystemTransform.transform.localPosition = Matrix4x4Utils.ExtractTranslationFromMatrix(ref m);
+        targetCoordinateSystemTransform.transform.localRotation = Matrix4x4Utils.ExtractRotationFromMatrix(ref m);
+    }
+
+  
+    
     virtual public bool Calibrate()
     {
         if (calibrationModality == CalibrationModality.None)
@@ -372,7 +412,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
             return false;
         }
 
-        calibrationExperiment.Calibrate(Matrix4x4.identity); // todo get remote coordinate system
+        calibrationExperiment.Calibrate(groundTruthCoordinateSystemTransform.localToWorldMatrix); // todo get remote coordinate system
 
         if (playAudio)
         {
@@ -393,70 +433,17 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     }
 
 
-    static public void changeVisibility(Transform t, bool visible)
-    {
-        // show / hide all meshes
-        foreach (MeshRenderer me in t.GetComponentsInChildren<MeshRenderer>())
-        {
-            me.enabled = visible;
-        }
 
-        foreach (LineRenderer le in t.GetComponentsInChildren<LineRenderer>())
-        {
-            le.enabled = visible;
-        }
-
-    }
-
-
-
-    /// <summary>
-    /// Returns the current location of the target and updates the target to the next position
-    /// </summary>
-    /// <returns></returns>
-    public virtual Vector3 PerformAlignment()
-    {
-        // do nothing when in the first screen
-        if (solver.sixDoFPattern == RealWorldCalibrationManager.SixDofCalibrationApproach.None)
-            return new Vector3(0, 0, 0);
-        Vector3 target;
-        switch (solver.sixDoFPattern)
-        {
-            // gets the position of the cube (somewhere in front of the headset)
-            case RealWorldCalibrationManager.SixDofCalibrationApproach.CubesHead:
-                target = virtualCalibrationTarget.transform.position;
-                index = (index + 1) % virtualTargetPositions.Count;
-                DisplayCurrentTarget();
-                break;
-
-            // basically the position we created a while back
-            case RealWorldCalibrationManager.SixDofCalibrationApproach.CubesHandHead:
-                target = virtualCalibrationTarget.transform.position;
-                index = (index + 1) % virtualTargetPositions.Count;
-                DisplayCurrentTarget();
-                break;
-
-            // basically the location of the hologram  (NOTE: Take a look at the SpaamSolver -> This has a special thing happening there)
-            case RealWorldCalibrationManager.SixDofCalibrationApproach.CubesHologram:
-                target = virtualCalibrationTarget.transform.position;
-                DisplayCurrentTarget();
-                break;
-
-            default:
-                target = new Vector3(0, 0, 0);
-                break;
-
-        }
-
-        return target;
-    }
 
 
     /// <summary>
     /// Stores the current alignment between real and virtual objects
     /// </summary>
-    public virtual void SaveCurrentAlignment()
+    public void CollectPoints()
     {
+        //
+        // First - let's deal with collecting the points for each calibration modality
+        //
         switch (calibrationModality)
         {
             case CalibrationModality.None:
@@ -465,57 +452,85 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
 
             // we align only one point - the gray sphere
             case CalibrationModality.Point:
-                
+                calibrationExperiment.PerformAlignment(
+                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere4.position),                             // position of the augmented reality sphere as positioned by the system or user
+                    targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position));
+                break;
+
+            // other two modalities calibrate four points at once
+            case CalibrationModality.Points:
+            case CalibrationModality.Hologram:
+                calibrationExperiment.PerformAlignment(
+                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere4.position),                             // position of the augmented reality sphere as positioned by the system or user
+                    targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position));
+
+                calibrationExperiment.PerformAlignment(
+                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere1.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere1.position),                             // position of the augmented reality sphere as positioned by the system or user
+                    targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere1.position));
+
+                calibrationExperiment.PerformAlignment(
+                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere2.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere2.position),                             // position of the augmented reality sphere as positioned by the system or user
+                    targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere2.position));
+
+                calibrationExperiment.PerformAlignment(
+                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere3.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere3.position),                             // position of the augmented reality sphere as positioned by the system or user
+                    targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere3.position));
+                break;
+
+        }
+
+        //
+        // Second - let's deal with visualiztaion aspects of the calibration interface
+        //
+
+        switch (calibrationModality)
+        {
+            case CalibrationModality.None:
+                break;
+
+            case CalibrationModality.Point:
+                index = (index + 1) % virtualTargetPositions.Count; // increment the target indes
+                break;
+
+            case CalibrationModality.Points:
+                index = (index + 1) % virtualTargetPositions.Count; // increment the target index
+                break;
+
+            case CalibrationModality.Hologram:
+                // do nothing - this is the VR simulation's part
                 break;
         }
 
-        // play sound
+        //
+        // Third - play sound to let the user know that the point was collected
+        //
         if (playAudio)
         {
             audioPlayer.clip = pointCollectedSound;
             audioPlayer.Play();
         }
-    }
 
-    /// <summary>
-    /// Returns the current location of the target and updates the target to the next position
-    /// </summary>
-    /// <returns></returns>
-    public virtual Tuple<Vector3, Vector3, Vector3, Vector3> PerformAlignmentSpecial()
-    {
-        // do nothing when in the first screen
-        if (solver.sixDoFPattern == RealWorldCalibrationManager.SixDofCalibrationApproach.None)
-            return new Tuple<Vector3, Vector3, Vector3, Vector3>(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero);
-
-        switch (solver.sixDoFPattern)
+        //
+        // Fourth - Move the virtual calibration target to a new location
+        // or calibrate it!
+        //
+        if (calibrationExperiment.manualAlignments.Count < GetRequiredPointsToCalibrate())
         {
-            // gets the position of the cube (somewhere in front of the headset)
-            case RealWorldCalibrationManager.SixDofCalibrationApproach.CubesHead:
-                index = (index + 1) % virtualTargetPositions.Count;
-                DisplayCurrentTarget();
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(virtualSphere4.position, virtualSphere1.position, virtualSphere2.position, virtualSphere3.position);
-
-
-            // basically the position we created a while back
-            case RealWorldCalibrationManager.SixDofCalibrationApproach.CubesHandHead:
-                index = (index + 1) % virtualTargetPositions.Count;
-                DisplayCurrentTarget();
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(virtualSphere4.position, virtualSphere1.position, virtualSphere2.position, virtualSphere3.position);
-
-
-            // basically the location of the hologram  (NOTE: Take a look at the SpaamSolver -> This has a special thing happening there)
-            case RealWorldCalibrationManager.SixDofCalibrationApproach.CubesHologram:
-                DisplayCurrentTarget();
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(virtualSphere4.position, virtualSphere1.position, virtualSphere2.position, virtualSphere3.position);
-            default:
-                return new Tuple<Vector3, Vector3, Vector3, Vector3>(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero);
-
-
+            DisplayCurrentTarget();
+        } else
+        {
+            // got enough points!
+            Calibrate();
         }
 
 
-    }
 
+    }
 
     /// <summary>
     /// Returns the number of points required for calibration
@@ -563,39 +578,29 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
 
 
 
-    #region Virtual Target Display and user interaction
-    /// <summary>
-    /// Called every time there is a condition / state change so that the location
-    /// of the targets are accurate with respect to the HMD
-    /// </summary>
-    public virtual void InitializePosition()
-    {
-        transformedTargetPosition.Clear();
-        for (int i = 0; i < virtualTargetPositions.Count; i++)
-        {
-            transformedTargetPosition.Add(ARCamera.transform.TransformPoint(virtualTargetPositions[i]));
-        }
-        index = 0;
-        initialized = true;
-        DisplayCurrentTarget();
-    }
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        virtualCalibrationTargetLerper = virtualCalibrationTarget.GetComponent<PoseInterpolation>();
-        VRUserInteractionTracker = virtualCalibrationTarget.GetComponent<TrackedObject>();
-    }
-
-    #endregion
-
+  
 
     #region HelperMethods
     static string PrintVector(Vector3 v)
     {
         return String.Format("({0,7:000.0000},{1,7:000.0000},{2,7:000.0000})", v.x, v.y, v.z);
     }
+
+    static public void changeVisibility(Transform t, bool visible)
+    {
+        // show / hide all meshes
+        foreach (MeshRenderer me in t.GetComponentsInChildren<MeshRenderer>())
+        {
+            me.enabled = visible;
+        }
+
+        foreach (LineRenderer le in t.GetComponentsInChildren<LineRenderer>())
+        {
+            le.enabled = visible;
+        }
+
+    }
+
     #endregion
 
 }

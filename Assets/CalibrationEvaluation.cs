@@ -82,7 +82,7 @@ public class CalibrationEvaluation : SPAAMSolver
     void Start()
     {
         //manager = (SPAAMEvalTargetManager)SPAAMTargetManager.Instance;
-        //manager.SetSolver(this);
+        //manager.SetRealWorldController(this);
         //cameraSpace = manager.displayCanvas.worldCamera;
         groundTruthAlignmentsBoth[0] = new List<MatchingPoints>();
         groundTruthAlignmentsBoth[1] = new List<MatchingPoints>();

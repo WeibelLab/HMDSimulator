@@ -39,7 +39,7 @@ public class SPAAM2DSolver : SPAAMSolver
     void Start()
     {
         //manager = (SPAAMEvalTargetManager)SPAAMTargetManager.Instance;
-        //manager.SetSolver(this);
+        //manager.SetRealWorldController(this);
         //cameraSpace = manager.displayCanvas.worldCamera;
     }
 

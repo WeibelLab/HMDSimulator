@@ -93,22 +93,17 @@ public class RealWorldCalibrationManager : MonoBehaviour
     }
 
 
-    public virtual void PerformAlignment(Vector3 Real_relativeObjectPosition, Vector3 AR_worldTargetPosition)
-    {
-       
-    }
-
-    public virtual void ResetPattern(AugmentedRealityCalibrationManager.CalibrationModality modality)
+    public void ResetPattern(AugmentedRealityCalibrationManager.CalibrationModality modality)
     {
         // communicates with the AR side to change what the user sees
-        ARHeadset.ConditionChange(modality);
+        ARHeadset.ChangeCalibrationModality(modality);
 
         // resets the location of the cube
         targetObject.localPosition = targetObjectStartPosition;
         targetObject.localRotation = targetObjectStartRotation;
 
         // applies changes the the local environment
-        updateModalityInstructions((int)sixDoFPattern);
+        updateModalityInstructions((int)modality);
 
         // updates the simulation so that we cannot grab the cube in the second one
         switch (modality)
@@ -163,80 +158,59 @@ public class RealWorldCalibrationManager : MonoBehaviour
         }
     }
 
-
-    public virtual void Solve()
+    /// <summary>
+    /// Sends a message to the AR Headset letting it know that it is time to calibrate
+    /// This event is associated with a SteamVR action "PerformAlignment". Alternatively,
+    /// users can press Space
+    /// </summary>
+    public void PerformAlignment()
     {
+        // Collect the current points and possibly calibrates if it all points
+        // required were collected
+        ARHeadset.CollectPoints();
 
-    }
-
-    protected virtual Matrix4x4 SolveAlignment(List<MatchingPoints> alignments, bool affine = true)
-    {
-        // input parameters
-        int alignmentCount = alignments.Count;
-        float[] input = new float[6 * alignmentCount];
-        float[] resultMatrix = new float[16];
-
-        // contruct input float array
-        for (int i = 0; i < alignmentCount; i++)
+        // after performing an alignment, checks if it was calibrated
+        if (ARHeadset.calibrated)
         {
-            int pairStep = 6 * i;
-            MatchingPoints curr = alignments[i];
-            input[pairStep + 0] = curr.objectPosition.x;
-            input[pairStep + 1] = curr.objectPosition.y;
-            input[pairStep + 2] = curr.objectPosition.z;
-            input[pairStep + 3] = curr.targetPosition.x;
-            input[pairStep + 4] = curr.targetPosition.y;
-            input[pairStep + 5] = curr.targetPosition.z;
+            // allow the user to move the object
+            cubeGrabbing.CanGrab = true;
+            cubeGrabbing.GoesBackToInitialPosition = false;
         }
 
-        // Call opencv function
-        float error = HMDSimOpenCV.SPAAM_Solve(input, alignmentCount, resultMatrix, affine, false, true);
-        Debug.Log("[RealWorldCalibrationManager] Reprojection error: " + error);
-
-        // Construct matrix
-        Matrix4x4 result = new Matrix4x4();
-        for (int i = 0; i < 16; i++)
-        {
-            result[i] = resultMatrix[i];
-        }
-
-        result = result.transpose;
-        Debug.Log("[RealWorldCalibrationManager] Result Matrix is: " + result);
-
-        return result;
+        // display survey!
+        // todo
     }
 
-    public virtual void update()
+    void Update()
     {
+        if (!ARHeadset)
+        {
+            ARHeadset = AugmentedRealityCalibrationManager.Instance;
+            ARHeadset.SetRealWorldController(this);
+        }
+
+        targetObjectStartPosition = targetObject.localPosition;
+        targetObjectStartRotation = targetObject.localRotation;
+
         // nothing
         if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
             ResetPattern(AugmentedRealityCalibrationManager.CalibrationModality.None);
-        }
 
         // calibration 1
         if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
             ResetPattern(AugmentedRealityCalibrationManager.CalibrationModality.Point);
-        }
 
         // calibration 2
         if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
             ResetPattern(AugmentedRealityCalibrationManager.CalibrationModality.Points);
-        }
 
         // calibration 3
         if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
             ResetPattern(AugmentedRealityCalibrationManager.CalibrationModality.Hologram);
-        }
 
         // calibrates if the user presses enter
         if (Input.GetKeyDown(KeyCode.Return))
-        {
             ARHeadset.Calibrate();
-        }
 
         //
         // Saves results if the user presses Enter
@@ -264,38 +238,5 @@ public class RealWorldCalibrationManager : MonoBehaviour
         {
             PerformAlignment();
         }
-
-    }
-
-    /// <summary>
-    /// Sends a message to the AR Headset letting it know that it is time to calibrate
-    /// </summary>
-    public void PerformAlignment()
-    {
-        ARHeadset.SaveCurrentAlignment();
-
-        // after performing an alignment, checks if it was calibrated
-        if (ARHeadset.calibrated)
-        {
-            // allow the user to move the object
-            cubeGrabbing.CanGrab = true;
-            cubeGrabbing.GoesBackToInitialPosition = false;
-        }
-
-        // display survey!
-    }
-
-    void Update()
-    {
-        if (!ARHeadset)
-        {
-            ARHeadset = AugmentedRealityCalibrationManager.Instance;
-            ARHeadset.SetSolver(this);
-        }
-
-        targetObjectStartPosition = targetObject.localPosition;
-        targetObjectStartRotation = targetObject.localRotation;
-
-        update();
     }
 }

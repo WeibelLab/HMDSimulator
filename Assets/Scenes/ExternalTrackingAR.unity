@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -733,6 +733,38 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &823044967
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 823044968}
+  m_Layer: 0
+  m_Name: '[AugmentedRealityCoordinateSystem]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &823044968
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 823044967}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 100, y: 100, z: 100}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1731729073}
+  - {fileID: 828369149}
+  m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &828369147
@@ -766,7 +798,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trackerName: OptitrackOriginGT
   isLocal: 0
-  offset: {x: 100, y: 100, z: 100}
+  offset: {x: 0, y: 0, z: 0}
 --- !u!4 &828369149
 Transform:
   m_ObjectHideFlags: 0
@@ -774,14 +806,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 828369147}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -100, y: -100, z: -100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1235894370}
   - {fileID: 1063443406}
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_Father: {fileID: 823044968}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &916577757
 GameObject:
@@ -1895,15 +1927,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1731729072}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -100, y: -100, z: -100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3920532750792945072}
   - {fileID: 1021826325}
   - {fileID: 1576348100}
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_Father: {fileID: 823044968}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1934930701
 GameObject:
@@ -1915,7 +1947,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1934930703}
   - component: {fileID: 1934930704}
-  - component: {fileID: 1934930705}
   - component: {fileID: 1934930702}
   m_Layer: 0
   m_Name: '[HMDSimulator - AR Calibration Manager]'
@@ -2046,22 +2077,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17238408fbe087b43916d2d5ac6f07c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useGroundTruth: 0
-  initialized: 0
   offset: {x: 100, y: 100, z: 100}
+  initialized: 0
+  useGroundTruth: 0
+  calibrated: 0
+  calibrationModality: 0
   virtualSpheresHandle: {fileID: 3834444458682374754}
   virtualCalibrationTarget: {fileID: 3920532750792945073}
+  targetObjectHighlight: {fileID: 1021826323}
   virtualSphere1: {fileID: 3920532749517369719}
   virtualSphere2: {fileID: 3920532750634526811}
   virtualSphere3: {fileID: 3920532750116529936}
   virtualSphere4: {fileID: 3920532749761230109}
+  targetCoordinateSystemTransform: {fileID: 1731729073}
+  currentLocationSphere1: {fileID: 1482088126}
+  currentLocationSphere2: {fileID: 62050989}
+  currentLocationSphere3: {fileID: 631946149}
+  currentLocationSphere4: {fileID: 554708472}
+  groundTruthCoordinateSystemTransform: {fileID: 828369149}
   groundTruthSphere1: {fileID: 1279163417}
   groundTruthSphere2: {fileID: 1660327634}
   groundTruthSphere3: {fileID: 1428890625}
   groundTruthSphere4: {fileID: 1069626538}
-  targetObjectHighlight: {fileID: 1021826323}
-  targetCoordinateSystemTransform: {fileID: 1731729073}
-  groundTruthCoordinateSystemTransform: {fileID: 0}
   ARCamera: {fileID: 1241394874}
   virtualTargetPositions:
   - {x: 0.04, y: 0.02, z: 0.21}
@@ -2104,10 +2141,73 @@ MonoBehaviour:
   voiceOverCollectMorePoints: {fileID: 8300000, guid: 606d26da0499b7a4b94cb25c549a4e9c,
     type: 3}
   audioPlayerForVoiceOver: {fileID: 1934930702}
-  expResult:
-    completionTime: 0
-    calibrationType: undefined
-    projectionMatrixLeft:
+  calibrationExperiment:
+    CalibrationModalityName: 
+    FullCalibrationStored: 0
+    expResult:
+      completionTime: 0
+      calibrationType: undefined
+      sixDoFUserAlignedMatrix:
+        e00: 0
+        e01: 0
+        e02: 0
+        e03: 0
+        e10: 0
+        e11: 0
+        e12: 0
+        e13: 0
+        e20: 0
+        e21: 0
+        e22: 0
+        e23: 0
+        e30: 0
+        e31: 0
+        e32: 0
+        e33: 0
+      sixDoFSimulatorGroundTruthMatrix:
+        e00: 0
+        e01: 0
+        e02: 0
+        e03: 0
+        e10: 0
+        e11: 0
+        e12: 0
+        e13: 0
+        e20: 0
+        e21: 0
+        e22: 0
+        e23: 0
+        e30: 0
+        e31: 0
+        e32: 0
+        e33: 0
+      sixDoFGroundTruthAlignedTransformationMatrix:
+        e00: 0
+        e01: 0
+        e02: 0
+        e03: 0
+        e10: 0
+        e11: 0
+        e12: 0
+        e13: 0
+        e20: 0
+        e21: 0
+        e22: 0
+        e23: 0
+        e30: 0
+        e31: 0
+        e32: 0
+        e33: 0
+      sixDofTranslationError: {x: 0, y: 0, z: 0}
+      sixDofRotationError: {x: 0, y: 0, z: 0}
+      i_sixDofInputPosition: []
+      o_sixDofUserTargetPositionAR: []
+      o_sixDofGroudTruthInputPosition: []
+      sixDofAlignmentsErrorVect: []
+      pointsCollected: 0
+      calibrationModality: -1
+      calibrationModalityStr: undefined
+    groundTruthEquation:
       e00: 0
       e01: 0
       e02: 0
@@ -2124,7 +2224,7 @@ MonoBehaviour:
       e31: 0
       e32: 0
       e33: 0
-    projectionMatrixRight:
+    manualEquation:
       e00: 0
       e01: 0
       e02: 0
@@ -2141,319 +2241,8 @@ MonoBehaviour:
       e31: 0
       e32: 0
       e33: 0
-    projectionGroundTruthMatrixLeft:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    projectionGroundTruthMatrixRight:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    projectionErrorLeft: {x: 0, y: 0, z: 0}
-    projectionErrorRight: {x: 0, y: 0, z: 0}
-    sixDoFAutoAlignedMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    sixDoFTransformationMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    sixDoFGroundTruthTransformationMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    sixDofTranslationError: {x: 0, y: 0, z: 0}
-    sixDofRotationError: {x: 0, y: 0, z: 0}
-    sixDofObjectPosition: []
-    sixDofAlignedPosition: []
-    sixDofObjectPositionAR: []
-    sixDofAlignmentsErrorVect: []
-    pointsCollected: 0
-    calibrationModality: -1
-    calibrationModalityStr: undefined
-  groundTruthEquation:
-    e00: 0
-    e01: 0
-    e02: 0
-    e03: 0
-    e10: 0
-    e11: 0
-    e12: 0
-    e13: 0
-    e20: 0
-    e21: 0
-    e22: 0
-    e23: 0
-    e30: 0
-    e31: 0
-    e32: 0
-    e33: 0
-  manualEquation:
-    e00: 0
-    e01: 0
-    e02: 0
-    e03: 0
-    e10: 0
-    e11: 0
-    e12: 0
-    e13: 0
-    e20: 0
-    e21: 0
-    e22: 0
-    e23: 0
-    e30: 0
-    e31: 0
-    e32: 0
-    e33: 0
-  groundTruthAlignments: []
-  manualAlignments: []
---- !u!114 &1934930705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934930701}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 432abf9eeee82304b929fc8055743464, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  expResult:
-    completionTime: 0
-    calibrationType: undefined
-    projectionMatrixLeft:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    projectionMatrixRight:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    projectionGroundTruthMatrixLeft:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    projectionGroundTruthMatrixRight:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    projectionErrorLeft: {x: 0, y: 0, z: 0}
-    projectionErrorRight: {x: 0, y: 0, z: 0}
-    sixDoFAutoAlignedMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    sixDoFTransformationMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    sixDoFGroundTruthTransformationMatrix:
-      e00: 0
-      e01: 0
-      e02: 0
-      e03: 0
-      e10: 0
-      e11: 0
-      e12: 0
-      e13: 0
-      e20: 0
-      e21: 0
-      e22: 0
-      e23: 0
-      e30: 0
-      e31: 0
-      e32: 0
-      e33: 0
-    sixDofTranslationError: {x: 0, y: 0, z: 0}
-    sixDofRotationError: {x: 0, y: 0, z: 0}
-    sixDofObjectPosition: []
-    sixDofAlignedPosition: []
-    sixDofObjectPositionAR: []
-    sixDofAlignmentsErrorVect: []
-    pointsCollected: 0
-    calibrationModality: -1
-    calibrationModalityStr: undefined
-  groundTruthEquation:
-    e00: 0
-    e01: 0
-    e02: 0
-    e03: 0
-    e10: 0
-    e11: 0
-    e12: 0
-    e13: 0
-    e20: 0
-    e21: 0
-    e22: 0
-    e23: 0
-    e30: 0
-    e31: 0
-    e32: 0
-    e33: 0
-  manualEquation:
-    e00: 0
-    e01: 0
-    e02: 0
-    e03: 0
-    e10: 0
-    e11: 0
-    e12: 0
-    e13: 0
-    e20: 0
-    e21: 0
-    e22: 0
-    e23: 0
-    e30: 0
-    e31: 0
-    e32: 0
-    e33: 0
-  groundTruthAlignments: []
-  manualAlignments: []
+    groundTruthAlignments: []
+    manualAlignments: []
 --- !u!1 &1971154990
 GameObject:
   m_ObjectHideFlags: 0
