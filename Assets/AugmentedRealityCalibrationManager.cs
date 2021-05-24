@@ -452,7 +452,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
             // we align only one point - the gray sphere
             case CalibrationModality.Point:
                 calibrationExperiment.PerformAlignment(
-                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position to the ground truth in the simulator, but in real life, it is just the local position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position to the ground truth in the simulator, but in real life, it is just the local position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere4.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position));
                 break;
@@ -461,22 +461,22 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
             case CalibrationModality.Points:
             case CalibrationModality.Hologram:
                 calibrationExperiment.PerformAlignment(
-                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere4.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position));
 
                 calibrationExperiment.PerformAlignment(
-                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere1.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere1.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere1.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere1.position));
 
                 calibrationExperiment.PerformAlignment(
-                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere2.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere2.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere2.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere2.position));
 
                 calibrationExperiment.PerformAlignment(
-                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere3.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere3.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere3.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere3.position));
                 break;
