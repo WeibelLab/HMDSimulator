@@ -42,7 +42,6 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     private PoseInterpolation virtualCalibrationTargetLerper; // let's make this fun, shall we?
 
     [Header("AR Objects used in calibration")]
-    public GameObject targetObjectHighlight;
     public Transform virtualSphere1;
     public Transform virtualSphere2;
     public Transform virtualSphere3;
@@ -135,8 +134,11 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         calibrated = false;
 
         // hide visualization that we show when calibrated
-        changeVisibility(targetObjectHighlight.transform, false);
-        
+        changeVisibility(currentLocationSphere1, false);
+        changeVisibility(currentLocationSphere2, false);
+        changeVisibility(currentLocationSphere3, false);
+        changeVisibility(currentLocationSphere4, false);
+
         // ARCoordinate system follows the offset applied to all the structures in the AR simulation
         ARCoordinateSystem.transform.position = offset;
         ARCoordinateSystem.transform.rotation = Quaternion.identity;
@@ -375,7 +377,10 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         if (calibrationExperiment.FullCalibrationStored)
         {
             // shows visualization of the cube as seen by the AR device after calibration
-            changeVisibility(targetObjectHighlight.transform, true);
+            changeVisibility(currentLocationSphere1, true);
+            changeVisibility(currentLocationSphere2, true);
+            changeVisibility(currentLocationSphere3, true);
+            changeVisibility(currentLocationSphere4, true);
 
             wasUsingGroundTruth = false;
             useGroundTruth = false;
@@ -412,6 +417,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         }
 
         calibrationExperiment.Calibrate(groundTruthCoordinateSystemTransform.localToWorldMatrix); // todo get remote coordinate system
+        calibrationExperiment.SaveExperiment();
 
         if (playAudio)
         {

@@ -125,7 +125,8 @@ public class HandAction : MonoBehaviour
         {
             if (GameObj.enabled)
             { 
-                if ((GameObj.transform.position - transform.position).sqrMagnitude < distance)
+                // only consider objects that we can grab
+                if ((GameObj.transform.position - transform.position).sqrMagnitude < distance && GameObj.CanGrab)
                 {
                     closestGameObject = GameObj;
                     distance = (GameObj.transform.position - transform.position).sqrMagnitude;

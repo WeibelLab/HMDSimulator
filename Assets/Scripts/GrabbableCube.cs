@@ -7,7 +7,7 @@ using Valve.VR;
 public class GrabbableCube : GrabbableObject
 {
 
-    public bool CanGrab = true;
+
     public bool GoesBackToInitialPosition = false;
 
     public Transform CurrentlyGrabbedBy;
