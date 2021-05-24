@@ -64,7 +64,7 @@ public class AugmentedReality3D3DCalibrationExperiment
         // how bad was that? (yes, we pre-calculate for now)
         expResult.sixDofAlignmentsErrorVect.Add(AR_outputPoseGroundTruth - AR_outputPose);
 
-        Debug.Log(String.Format("[ARCalibrationSolver] Aligned {0}  with {1}  (expected (in AR), diff: {3} - {4} cm", PrintVector(AR_inputPose), PrintVector(AR_outputPose), PrintVector(AR_outputPoseGroundTruth), PrintVector(AR_outputPoseGroundTruth - AR_outputPose), (AR_outputPoseGroundTruth - AR_outputPose).magnitude * 100));
+        Debug.Log(String.Format("[ARCalibrationSolver] Aligned {0}  with {1}  (expected {2} (in AR), diff: {3} - {4} cm", PrintVector(AR_inputPose), PrintVector(AR_outputPose), PrintVector(AR_outputPoseGroundTruth), PrintVector(AR_outputPoseGroundTruth - AR_outputPose), (AR_outputPoseGroundTruth - AR_outputPose).magnitude * 100));
 
         // save last data point for the time-to-task measurement
         expResult.endTime = System.DateTime.Now;

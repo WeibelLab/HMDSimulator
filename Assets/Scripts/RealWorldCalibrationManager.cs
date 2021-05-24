@@ -20,26 +20,6 @@ public class RealWorldCalibrationManager : MonoBehaviour
     protected Quaternion targetObjectStartRotation;
     private PoseInterpolation targetObjectLerper;
 
-    [Tooltip("If checked, calibration will happen automatically after a certain amount of points is collected")]
-    public bool calibrateAutomatically = false;
-
-    [Tooltip("Have we solved it?")]
-    public bool solved = false;
-
-    public enum SixDofCalibrationApproach
-    {
-        None,
-        CubesHead,          // calibrate cube by moving both
-        CubesHandHead,      // calibrate cubes using hand and head
-        CubesHologram,      // calibrate cubes by moving a hologram
-        Pattern_count
-    }
-
-    [Header("6DoF Calibration specifics")]
-    [Tooltip("The tracker's coordinate system center")]
-    public Transform TrackerBase;
-
-    public SixDofCalibrationApproach sixDoFPattern;
 
     [Header("Visual feedback")]
     public Transform[] ModalityInstructions;
@@ -169,6 +149,14 @@ public class RealWorldCalibrationManager : MonoBehaviour
         // required were collected
         ARHeadset.CollectPoints();
 
+        // if using the hologram modality then we move the cube
+        if (ARHeadset.calibrationModality == AugmentedRealityCalibrationManager.CalibrationModality.Hologram)
+        {
+            ++currentCubePosition;
+            targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);
+            InvisibleCubeLerper.StartLerping(Camera.main.transform.TransformPoint(InvisibleCubeInitialPosition), Quaternion.identity);
+        }
+
         // after performing an alignment, checks if it was calibrated
         if (ARHeadset.calibrated)
         {
@@ -225,8 +213,8 @@ public class RealWorldCalibrationManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.N))
         {
             ARHeadset.NextPoint();
-
-            if (sixDoFPattern == SixDofCalibrationApproach.CubesHologram)
+            // if using the hologram modality then we move the cube
+            if (ARHeadset.calibrationModality == AugmentedRealityCalibrationManager.CalibrationModality.Hologram)
             {
                 ++currentCubePosition;
                 targetObjectLerper.StartLerping(CubePositions[currentCubePosition % CubePositions.Length].position, CubePositions[currentCubePosition % CubePositions.Length].rotation);

@@ -137,19 +137,17 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         // hide visualization that we show when calibrated
         targetObjectHighlight.SetActive(false);
 
-        // cleans the transformation
+        // ARCoordinate system follows the offset applied to all the structures in the AR simulation
         ARCoordinateSystem.transform.position = offset;
         ARCoordinateSystem.transform.rotation = Quaternion.identity;
 
-        targetCoordinateSystemTransform.position = Vector3.zero;
-        targetCoordinateSystemTransform.rotation = Quaternion.identity;
+        // This object starts at position (0,0,0) in the simulated space
+        targetCoordinateSystemTransform.localPosition = Vector3.zero;
+        targetCoordinateSystemTransform.localRotation = Quaternion.identity;
 
         // reset other variables
         useGroundTruth = false;
         wasUsingGroundTruth = false;
-
-        // makes sure that virtual calibration target is in the coordinate system it wants to calibrate
-        virtualCalibrationTarget.transform.SetParent(targetCoordinateSystemTransform);
 
         // different modes require different vizualizations
         switch (calibrationModality)
@@ -225,9 +223,6 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
                 changeVisibility(virtualSphere2, true);
                 changeVisibility(virtualSphere3, true);
                 changeVisibility(virtualSpheresHandle, true);
-
-                // making sure that template is a child of this target manager
-                virtualCalibrationTarget.transform.parent = this.transform;
 
                 index = 0;
                 initialized = true;
@@ -372,7 +367,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     /// Clal this method to hide calibration targetsa dn to apply an existing calibration matrix
     /// </summary>
     /// <param name="calibrated"></param>
-    public virtual void SetCalibrated()
+    public void SetCalibrated()
     {
         // hides calibration target
         HideTarget();
@@ -385,6 +380,8 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
                 targetObjectHighlight.SetActive(true);
             }
 
+            wasUsingGroundTruth = false;
+            useGroundTruth = false;
             ApplyMatrixToTargetCoordinateSystem(ref calibrationExperiment.manualEquation);
         } else
         {
@@ -393,7 +390,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
 
     }
 
-    protected virtual void ApplyMatrixToTargetCoordinateSystem(ref Matrix4x4 m)
+    protected void ApplyMatrixToTargetCoordinateSystem(ref Matrix4x4 m)
     {
         targetCoordinateSystemTransform.transform.localPosition = Matrix4x4Utils.ExtractTranslationFromMatrix(ref m);
         targetCoordinateSystemTransform.transform.localRotation = Matrix4x4Utils.ExtractRotationFromMatrix(ref m);
@@ -458,7 +455,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
             // we align only one point - the gray sphere
             case CalibrationModality.Point:
                 calibrationExperiment.PerformAlignment(
-                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position to the ground truth in the simulator, but in real life, it is just the local position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere4.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position));
                 break;
@@ -467,22 +464,22 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
             case CalibrationModality.Points:
             case CalibrationModality.Hologram:
                 calibrationExperiment.PerformAlignment(
-                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere4.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere4.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere4.position));
 
                 calibrationExperiment.PerformAlignment(
-                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere1.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere1.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere1.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere1.position));
 
                 calibrationExperiment.PerformAlignment(
-                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere2.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere2.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere2.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere2.position));
 
                 calibrationExperiment.PerformAlignment(
-                    targetCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere3.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
+                    groundTruthCoordinateSystemTransform.InverseTransformPoint(currentLocationSphere3.position),                     // position of the gray sphere as tracked by OptiTrack - it is a relative position
                     targetCoordinateSystemTransform.InverseTransformPoint(virtualSphere3.position),                             // position of the augmented reality sphere as positioned by the system or user
                     targetCoordinateSystemTransform.InverseTransformPoint(groundTruthSphere3.position));
                 break;
@@ -562,11 +559,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        update();       // other classes inherit from AugmentedRealityCalibrationManager
-    }
 
-    protected virtual void update()
-    {
         // update matrix being used
         if (useGroundTruth && !wasUsingGroundTruth)
         {
@@ -579,9 +572,9 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
             wasUsingGroundTruth = false;
             ApplyMatrixToTargetCoordinateSystem(ref calibrationExperiment.manualEquation);
         }
+
+
     }
-
-
 
   
 
