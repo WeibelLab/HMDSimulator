@@ -103,6 +103,10 @@ public class AugmentedReality3D3DCalibrationExperiment
         Vector3 translationGroundTruth = Matrix4x4Utils.ExtractTranslationFromMatrix(ref groundTruthEquation),
                 translationManual = Matrix4x4Utils.ExtractTranslationFromMatrix(ref manualEquation);
 
+   
+        Vector3 scaleGrountTruth = Matrix4x4Utils.ExtractScaleFromMatrix(ref groundTruthEquation),
+                scaleManual = Matrix4x4Utils.ExtractScaleFromMatrix(ref manualEquation);
+
         expResult.sixDofTranslationError = translationGroundTruth - translationManual;
 
 
@@ -111,6 +115,9 @@ public class AugmentedReality3D3DCalibrationExperiment
         Debug.Log("[ARCalibrationSolver] Ground Truth: " + groundTruthEquation);
         Debug.Log("[ARCalibrationSolver] Translation error: " + expResult.sixDofTranslationError);
         Debug.Log("[ARCalibrationSolver] Rotation error: " + expResult.sixDofRotationError);
+
+        Debug.Log("[ARCalibrationSolver] Resulting scale: " + PrintVector(scaleManual));
+        Debug.Log("[ARCalibrationSolver] Resulting scale (ground truth): " + PrintVector(scaleGrountTruth));
 
         Debug.Log("[ARCalibrationSolver] Resulting rotation: " + PrintVector(rotationManual));
         Debug.Log("[ARCalibrationSolver] Resulting rotation (ground truth): " + PrintVector(rotationGroundTruth));
@@ -188,6 +195,7 @@ public class AugmentedReality3D3DCalibrationExperiment
         }
 
         result = result.transpose;
+        result[15] = 1.0f;
         Debug.Log("[ARCalibrationSolver] Result Matrix is: " + result);
 
         return result;

@@ -135,8 +135,8 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         calibrated = false;
 
         // hide visualization that we show when calibrated
-        targetObjectHighlight.SetActive(false);
-
+        changeVisibility(targetObjectHighlight.transform, false);
+        
         // ARCoordinate system follows the offset applied to all the structures in the AR simulation
         ARCoordinateSystem.transform.position = offset;
         ARCoordinateSystem.transform.rotation = Quaternion.identity;
@@ -375,10 +375,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         if (calibrationExperiment.FullCalibrationStored)
         {
             // shows visualization of the cube as seen by the AR device after calibration
-            if (!targetObjectHighlight.activeInHierarchy)
-            {
-                targetObjectHighlight.SetActive(true);
-            }
+            changeVisibility(targetObjectHighlight.transform, true);
 
             wasUsingGroundTruth = false;
             useGroundTruth = false;
@@ -596,6 +593,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
         {
             le.enabled = visible;
         }
+
 
     }
 
