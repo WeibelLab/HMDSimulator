@@ -268,6 +268,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
                 changeVisibility(virtualSphere1, true);
                 changeVisibility(virtualSphere2, true);
                 changeVisibility(virtualSphere3, true);
+                changeVisibility(virtualSphere4, true);
                 changeVisibility(virtualSpheresHandle, true);
                 break;
 
@@ -283,6 +284,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
                 changeVisibility(virtualSphere1, false);
                 changeVisibility(virtualSphere2, false);
                 changeVisibility(virtualSphere3, false);
+                changeVisibility(virtualSphere4, true);
                 changeVisibility(virtualSpheresHandle, false);
                 break;
 
@@ -294,6 +296,7 @@ public class AugmentedRealityCalibrationManager : MonoBehaviour
                 changeVisibility(virtualSphere1, true);
                 changeVisibility(virtualSphere2, true);
                 changeVisibility(virtualSphere3, true);
+                changeVisibility(virtualSphere4, true);
                 changeVisibility(virtualSpheresHandle, true);
 
                 // what we really do here is to move a real, invisible object on the VR side
