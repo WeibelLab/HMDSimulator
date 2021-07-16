@@ -63,8 +63,15 @@ public class RealWorldCalibrationManager : MonoBehaviour
     {
         foreach (Transform t in ModalityInstructions)
         {
+            
             changeVisibility(t, false);
+            foreach (DisappearAfter10Seconds d in t.GetComponentsInChildren<DisappearAfter10Seconds>())
+            {
+                d.enabled = true;
+            }
         }
+
+        
 
         if (index < ModalityInstructions.Length)
         {

@@ -17,7 +17,7 @@ public class DisplayProjectionUI : DisplayProjection
     //        texture.Resize(src.width, src.height);
     //    }
 
-    //    //cam.projectionMatrix = oldProj;
+    //    //cam.projectionMatrix = previousProjectionMatrix;
     //    RenderTexture old = RenderTexture.active;
     //    RenderTexture.active = src;
     //    //don't forget that you need to specify rendertexture before you call readpixels

@@ -291,9 +291,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 0}
   eye: {fileID: 692251548}
-  isLeft: 0
-  eyeSeperation: 0.07
-  setEysSeperation: 0
+  isLeftDisplay: 0
+  forcedEyeSeparation: 0.07
+  forceEyeSeparation: 0
   once: 0
   newProj:
     e00: 0
@@ -620,11 +620,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 692251548}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.83800006, y: 0.1789, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &823044967
 GameObject:
@@ -656,7 +656,7 @@ Transform:
   - {fileID: 1731729073}
   - {fileID: 828369149}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &828369147
 GameObject:
@@ -834,7 +834,7 @@ Transform:
   - {fileID: 53335864}
   - {fileID: 365318672}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1241394876
 MonoBehaviour:
@@ -1568,9 +1568,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 0}
   eye: {fileID: 692251548}
-  isLeft: 1
-  eyeSeperation: 0.07
-  setEysSeperation: 0
+  isLeftDisplay: 1
+  forcedEyeSeparation: 0.07
+  forceEyeSeparation: 0
   once: 0
   newProj:
     e00: 0
@@ -2676,7 +2676,7 @@ PrefabInstance:
     - target: {fileID: 8040761153831718009, guid: 32838ad69beae2644947f2cac8235c48,
         type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8991347754795140454, guid: 32838ad69beae2644947f2cac8235c48,
         type: 3}

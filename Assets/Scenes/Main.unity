@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6aafcd1221461f043913e23cbe6423e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scenePrefix: ExternalTracking
+  scenePrefix: NeedleBiopsy
   sceneNames:
   - 
   - 
