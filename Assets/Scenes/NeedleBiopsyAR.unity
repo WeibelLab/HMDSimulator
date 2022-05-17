@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731713, g: 0.13414736, b: 0.12107852, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -168,9 +168,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 0}
   eye: {fileID: 692251548}
-  isLeft: 0
-  eyeSeperation: 0.07
-  setEysSeperation: 0
+  isLeftDisplay: 0
+  forcedEyeSeparation: 0.007
+  forceEyeSeparation: 0
   once: 1
   newProj:
     e00: 0
@@ -529,6 +529,105 @@ MonoBehaviour:
   trackerName: Display
   isLocal: 0
   offset: {x: 100, y: 100, z: 100}
+--- !u!1 &1420542900
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1420542901}
+  - component: {fileID: 1420542904}
+  - component: {fileID: 1420542903}
+  - component: {fileID: 1420542902}
+  m_Layer: 0
+  m_Name: (Alpha 3 - Toggle ON) breast model fresnel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1420542901
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420542900}
+  m_LocalRotation: {x: 0, y: 0, z: 0.00008726013, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_Children: []
+  m_Father: {fileID: 7326229114353736956}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0.01}
+--- !u!114 &1420542902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420542900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cfb126c22e088a4b839a9666a62cbe9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  logName: breast shell
+  toggleKey: 51
+  startEnabled: 0
+  toggleMeshes: 1
+  toggleScripts: 0
+  affectSelf: 0
+  currentState: 0
+--- !u!23 &1420542903
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420542900}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 78d64510225a2b84db55bb43d0c0c38c, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &1420542904
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420542900}
+  m_Mesh: {fileID: -1634022077968295291, guid: 2c54558bbb1c96a41a7bf927265f2118, type: 3}
 --- !u!1 &1476803547
 GameObject:
   m_ObjectHideFlags: 0
@@ -764,9 +863,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 0}
   eye: {fileID: 692251548}
-  isLeft: 1
-  eyeSeperation: 0.07
-  setEysSeperation: 0
+  isLeftDisplay: 0
+  forcedEyeSeparation: 0.007
+  forceEyeSeparation: 0
   once: 1
   newProj:
     e00: 0
@@ -1097,7 +1196,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e831323d1fb2e44996ef4430e0cbdb6, type: 2}
+  - {fileID: 2100000, guid: 78d64510225a2b84db55bb43d0c0c38c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1193,7 +1292,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e831323d1fb2e44996ef4430e0cbdb6, type: 2}
+  - {fileID: 2100000, guid: 78d64510225a2b84db55bb43d0c0c38c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1823,7 +1922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 986acf4b13d50ea489b850abbef71ca9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  trackerName: breast_model
+  trackerName: breast
   isLocal: 0
   offset: {x: 100, y: 100, z: 100}
 --- !u!1 &6264637276611900432
@@ -1963,6 +2062,7 @@ Transform:
   - {fileID: 3566663436670332518}
   - {fileID: 2112846688}
   - {fileID: 1199906761}
+  - {fileID: 1420542901}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2114,7 +2214,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6e831323d1fb2e44996ef4430e0cbdb6, type: 2}
+  - {fileID: 2100000, guid: 78d64510225a2b84db55bb43d0c0c38c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

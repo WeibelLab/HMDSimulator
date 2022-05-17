@@ -9,14 +9,14 @@ public class DisplayProjection : MonoBehaviour
 
     public Camera cam;
     public GameObject eye;
-    public bool isLeft = false;
-    public float eyeSeperation = 0.007f;
-    public bool setEysSeperation = false;
+    public bool isLeftDisplay = false;
+    public float forcedEyeSeparation = 0.007f;
+    public bool forceEyeSeparation = false;
     public bool once = false;
 
     private bool init = false;
 
-    private Matrix4x4 oldProj;
+    private Matrix4x4 previousProjectionMatrix;
     public Matrix4x4 newProj;
     public Matrix4x4 newProjWithoutOffset;
 
@@ -28,13 +28,34 @@ public class DisplayProjection : MonoBehaviour
     public Transform eyeEst;
     public Transform len;
 
+    /// <summary>
+    /// Returns the current eye separation
+    /// </summary>
+    /// <returns></returns>
+    public float GetEyeSeparation()
+    {
+        if (forceEyeSeparation)
+        {
+            return forcedEyeSeparation;
+        }
+        else
+        {
+
+            Vector3 leftEye = UnityEngine.XR.InputTracking.GetLocalPosition(XRNode.LeftEye);
+            Vector3 rightEye = UnityEngine.XR.InputTracking.GetLocalPosition(XRNode.RightEye);
+            Vector3 distance = (leftEye - rightEye);
+            return distance.magnitude;
+        }
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
         cam = GetComponent<Camera>();
-        Debug.Log(name);
-        //Debug.Log(cam.projectionMatrix);
-        oldProj = cam.projectionMatrix;
+
+        // keeps it here so that we can undo
+        previousProjectionMatrix = cam.projectionMatrix;
     }
 
     // Update is called once per frame
@@ -42,15 +63,17 @@ public class DisplayProjection : MonoBehaviour
     {
         MainManager.Instance.trackerManager.ForceUpdateTrackedObject();
         eyePosition = eye.transform.position;
+
+        // if an XR Device is present, we will render considering the user's eye
         if (XRDevice.isPresent)
         {
             
-            if (isLeft)
+            if (isLeftDisplay)
             {
                 //localPos = UnityEngine.XR.InputTracking.GetLocalPosition(XRNode.LeftEye);
-                if (setEysSeperation)
+                if (forceEyeSeparation)
                 {
-                    localPos = new Vector3(-eyeSeperation / 2.0f, 0, 0);
+                    localPos = new Vector3(-forcedEyeSeparation / 2.0f, 0, 0);
                 }
                 else
                 {
@@ -68,9 +91,9 @@ public class DisplayProjection : MonoBehaviour
             else
             {
                 //localPos = UnityEngine.XR.InputTracking.GetLocalPosition(XRNode.RightEye);
-                if (setEysSeperation)
+                if (forceEyeSeparation)
                 {
-                    localPos = new Vector3(eyeSeperation / 2.0f, 0, 0);
+                    localPos = new Vector3(forcedEyeSeparation / 2.0f, 0, 0);
                 }
                 else
                 {
@@ -81,10 +104,9 @@ public class DisplayProjection : MonoBehaviour
                     float seperation = distance.magnitude;
                     localPos = new Vector3(seperation / 2.0f, 0, 0);
                 }
-                //UnityEngine.XR.InputDevices.GetDeviceAtXRNode(XRNode.RightEye)
-                //    .TryGetFeatureValue(CommonUsages.devicePosition, out localPos);
+
             }
-            //Debug.Log(isLeft + ":" + localPos);
+            //Debug.Log(isLeftDisplay + ":" + localPos);
             //eyePosition = localPos + new Vector3(100,100,100); // TODO: Fix later //eye.transform.TransformPoint(localPos);
             eyePosition = eye.transform.TransformPoint(localPos);
         }
@@ -104,12 +126,6 @@ public class DisplayProjection : MonoBehaviour
             eyeEst.transform.localPosition = new Vector3(0,0,0);//-center;
         }
 
-        if (name == "Left")
-        {
-            //Debug.Log(center);
-        }
-
-        //center *= 0.985f;
 
         double left = center.x - width / 2.0;
         double right = center.x + width / 2.0;
@@ -127,9 +143,7 @@ public class DisplayProjection : MonoBehaviour
         bottom *= scale;
 
         newProjWithoutOffset = Matrix4x4.Frustum((float)left, (float)right, (float)bottom, (float)top, (float)near, (float)far);
-        newProj = newProjWithoutOffset * offset;//oldProj * offset;
-        //newProj[0, 0] *= 1.0f;
-        //newProj[1, 1] *= 1.0f;
+        newProj = newProjWithoutOffset * offset;
 
         if (!once)
         {
@@ -144,8 +158,6 @@ public class DisplayProjection : MonoBehaviour
             }
         }
 
-        //cam.stereoSeparation
-        //cam.SetStereoProjectionMatrix(Camera.StereoscopicEye.Left, );
     }
 
     
