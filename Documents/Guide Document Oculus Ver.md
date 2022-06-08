@@ -34,3 +34,4 @@
 1. Switch to Real Scene (scene with "Real" Suffix) for the example you created in Example#1.
 2. Open the Inspector for the cube.
 3. Change the value in the "Buffer Limit" parameter to desired buffer (latency). For this example, we can set it to 800.
+4. ![Gif of Changing Buffer Limit](Images/changebufferlimit.gif)
