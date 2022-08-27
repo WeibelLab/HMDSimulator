@@ -42,6 +42,7 @@ public class CharucoCameraCalibration : MonoBehaviour
     [Header("Calibration board")]
     [Tooltip("If true, applies the custom calibration matrix saved here during start")]
     public bool ApplyCustomCalibrationMatrixOnStart = false;
+    public bool ApplyProjectionMatrixOnStart = false;
     public float[] CustomCalibrationMatrix = new float[9];
     public float[] CustomDistCoeffs = new float[5];
 
@@ -80,34 +81,86 @@ public class CharucoCameraCalibration : MonoBehaviour
 
         if (ApplyCustomCalibrationMatrixOnStart)
         {
-            bool calibrationMatrixIsNotAllZeroes = false;
-            foreach (var el in CustomCalibrationMatrix)
-            {
-                if (el != 0.0f)
-                {
-                    calibrationMatrixIsNotAllZeroes = true;
-                    break;
-                }
-            }
-
-            if (calibrationMatrixIsNotAllZeroes)
-            {
-                bool result = HMDSimOpenCV.Aruco_SetCameraIntrinsics(chBoard.detectorHandle, CustomCalibrationMatrix, CustomDistCoeffs, CustomDistCoeffs.Length);
-                if (result)
-                {
-                    calibrated = true;
-                    Debug.Log("[CharucoCameraCalibration] Applied custom calibration matrix");
-                }
-                else
-                {
-                    Debug.LogError("[CharucoCameraCalibration] Could not apply custom calibration matrix. Check logs!");
-                }
-            }
+            UseCustomCameraIntrinsics();
+        } else if (ApplyProjectionMatrixOnStart)
+        {
+            UseCameraIntrinsics();
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// Applies the Unity camera projection matrix instead as the intrinsic matrix for detecting markers
+    ///  //  member variables |      indices
+    // ------------------|-----------------
+    // m00 m01 m02 m03   |   00  04  08  12
+    // m10 m11 m12 m13   |   01  05  09  13
+    // m20 m21 m22 m23   |   02  06  10  14
+    // m30 m31 m32 m33   |   03  07  11  15
+    //M[RowIndex, ColumnIndex] == M[RowIndex + ColumnIndex * 4]
+    /// 
+    /// </summary>
+    public bool UseCameraIntrinsics()
+    {
+        // uses the camera projection matrix instead
+        float[] intrinsicCalibrationMatrix = new float[9];
+        float[] distortionCoeff = new float[4];
+        intrinsicCalibrationMatrix[0] = locatableCamera.trackableCamera.projectionMatrix.m00;
+        intrinsicCalibrationMatrix[1] = locatableCamera.trackableCamera.projectionMatrix.m01;
+        intrinsicCalibrationMatrix[2] = locatableCamera.trackableCamera.projectionMatrix.m02;
+        intrinsicCalibrationMatrix[3] = locatableCamera.trackableCamera.projectionMatrix.m10;
+        intrinsicCalibrationMatrix[4] = locatableCamera.trackableCamera.projectionMatrix.m11;
+        intrinsicCalibrationMatrix[5] = locatableCamera.trackableCamera.projectionMatrix.m12;
+        intrinsicCalibrationMatrix[6] = locatableCamera.trackableCamera.projectionMatrix.m20;
+        intrinsicCalibrationMatrix[7] = locatableCamera.trackableCamera.projectionMatrix.m21;
+        intrinsicCalibrationMatrix[8] = -locatableCamera.trackableCamera.projectionMatrix.m22;
+        bool result = HMDSimOpenCV.Aruco_SetCameraIntrinsics(chBoard.detectorHandle, intrinsicCalibrationMatrix, distortionCoeff, 0);
+        if (result)
+        {
+            calibrated = true;
+            Debug.Log("[CharucoCameraCalibration] Applied projection matrix as the calibration matrix");
+        }
+        else
+        {
+            Debug.LogError("[CharucoCameraCalibration] Could not apply projection matrix as the calibration matrix. Check logs!");
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Uses a custom camera matrix to detect markers
+    /// </summary>
+    public bool UseCustomCameraIntrinsics()
+    {
+        bool calibrationMatrixIsNotAllZeroes = false;
+        foreach (var el in CustomCalibrationMatrix)
+        {
+            if (el != 0.0f)
+            {
+                calibrationMatrixIsNotAllZeroes = true;
+                break;
+            }
+        }
+
+        // can't apply a calibration matrix taht is all zeroes
+        if (!calibrationMatrixIsNotAllZeroes)
+            return false;
+
+        bool result = HMDSimOpenCV.Aruco_SetCameraIntrinsics(chBoard.detectorHandle, CustomCalibrationMatrix, CustomDistCoeffs, CustomDistCoeffs.Length);
+        if (result)
+        {
+            calibrated = true;
+            Debug.Log("[CharucoCameraCalibration] Applied custom calibration matrix");
+        }
+        else
+        {
+            Debug.LogError("[CharucoCameraCalibration] Could not apply custom calibration matrix. Check logs!");
+        }
+        return result;
+
+    }
+
+        // Update is called once per frame
+        void Update()
     {
         if (Input.GetKeyDown(KeyCode.K))
         {

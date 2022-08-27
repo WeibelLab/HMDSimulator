@@ -239,7 +239,7 @@ public class MarkerTracking : MonoBehaviour
                         }
 
                         marker.trackedMarkerData.position = new Vector3(posVecs[i * 3], posVecs[i * 3 + 1], posVecs[i * 3 + 2]);
-                        marker.trackedMarkerData.posInWorld = cameraCalibrationHelper.locatableCamera.transform.TransformPoint(marker.trackedMarkerData.position); // todo: use lastFrameLocalToWorld instead
+                        //marker.trackedMarkerData.posInWorld = cameraCalibrationHelper.locatableCamera.transform.TransformPoint(marker.trackedMarkerData.position); // todo: use lastFrameLocalToWorld instead
                         marker.trackedMarkerData.posInWorld = cameraCalibrationHelper.locatableCamera.lastFrameLocalToWorld.MultiplyPoint3x4(marker.trackedMarkerData.position);
 
                         int offset = i * 9;

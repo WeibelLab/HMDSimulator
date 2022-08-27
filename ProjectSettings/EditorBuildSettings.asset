@@ -35,10 +35,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/ArucoEvalReal.unity
     guid: 75c4f9439ee17724b8dfe32f21febbb6
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/CaseStudyReal.unity
     guid: c777a5658c97222488e542a03dfba796
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/CaseStudyAR.unity
     guid: f5d2c8158d22b874b98d115c771f2ea5
   - enabled: 0
