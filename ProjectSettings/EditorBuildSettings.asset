@@ -11,10 +11,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Main.unity
     guid: 1dc984fe22ba16c41ad6f344e5f449d8
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/DefaultAR.unity
     guid: 4c7b2fee38202bf4984dbd5f275e3b41
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/DefaultReal.unity
     guid: 702e2ad7ce8ee70458c1889b2d438c42
   - enabled: 1
@@ -53,6 +53,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/NeedleBiopsyReal.unity
     guid: 21f2a570e59a3ff4c8aeda3dc7ae03cc
+  - enabled: 1
+    path: Assets/Scenes/RayTestReal.unity
+    guid: 91cf9264b5acd50448f43e9ea5f8ee93
+  - enabled: 1
+    path: Assets/Scenes/RayTestAR.unity
+    guid: 0ff1153f7902a9945b02ec894e68ac2f
+  - enabled: 1
+    path: Assets/Scenes/ExampleReal.unity
+    guid: 2631d0d2ddd62964e9000b0235d78314
+  - enabled: 1
+    path: Assets/Scenes/ExampleAR.unity
+    guid: a454fa8626d14e841aad05c6c76a45a9
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 4d1d4de5dded0c749a2974f0b9c7ae01,
       type: 2}
